@@ -1,3 +1,4 @@
+"use client";
 import React, { forwardRef } from 'react';
 
 interface LocalVideoProps {
@@ -8,15 +9,16 @@ interface LocalVideoProps {
   className?: string;
 }
 
-const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(({ src, autoplay = false, loop = false, muted = false, className }, ref) => {
+const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(({ src, autoplay = false, loop = false, muted = false, className = '' }, ref) => {
   return (
     <video
       ref={ref}
       src={src}
       autoPlay={autoplay}
       loop={loop}
+      controls
       muted={muted}
-      className={`w-full h-full object-cover ${className}`}
+      className={`w-full h-full ${className}`}
     >
       Your browser does not support the video tag.
     </video>

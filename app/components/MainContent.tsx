@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 const MainContent = () => {
   return (
     <motion.div
-      className="w-full md:w-2/3 p-4 flex items-center justify-center h-full md:h-screen order-first"
+      className="w-full md:w-2/3 p-4 flex items-center justify-center h-full md:h-screen md:order-2 order-1"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
