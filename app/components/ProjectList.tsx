@@ -38,7 +38,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
   };
 
   return (
-    <div className="relative flex flex-col w-full h-screen items-center pl-4 pr-4 overflow-auto justify-center md:w-2/3">
+    <div className="relative flex flex-col w-full h-screen items-center pl-4 pr-4 overflow-auto justify-center md:w-2/3 project-list-container">
       <div className="space-y-4 w-full">
         {projects.map((project, index) => (
           <div
@@ -76,7 +76,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
             </svg>
           </button>
           <Suspense fallback={<div className="w-full h-full bg-gray-200 rounded-lg" />}>
-            <div className={`w-full ${projects[selectedProject].name === 'Bang Abah' ? 'aspect-w-9 aspect-h-16' : ''} max-w-screen-md`}>
+            <div className={`video-container ${projects[selectedProject].name === 'Bang Abah' ? 'aspect-w-9 aspect-h-16' : ''}`}>
               <LocalVideo
                 src={projects[selectedProject].video}
                 autoplay
