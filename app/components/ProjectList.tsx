@@ -63,7 +63,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
       </div>
       {selectedProject !== null && (
         <motion.div
-          className="fixed w-[100%] md:w-[40%] lg:w-[55%] h-auto bg-white rounded-lg flex justify-center items-center shadow-lg transition-all duration-300 md:right-2"
+          className="fixed w-full md:w-2/5 lg:w-2/3 h-auto bg-white rounded-lg flex justify-center items-center shadow-lg transition-all duration-300 md:right-2"
           variants={fadeUpVariant}
           transition={{ duration: 0.5 }}
         >
