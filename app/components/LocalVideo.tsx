@@ -1,4 +1,3 @@
-// LocalVideo.jsx
 import React, { forwardRef } from 'react';
 
 interface LocalVideoProps {
@@ -10,14 +9,33 @@ interface LocalVideoProps {
   className?: string;
   poster?: string;
   preload?: "none" | "metadata" | "auto";
+  lowResSrc?: string; // Add a prop for a low-resolution video source
 }
 
 const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
-  ({ src, autoplay = false, loop = false, muted = true, controls = true, className = '', poster = '', preload = "auto" }, ref) => {
+  ({
+    src,
+    autoplay = false,
+    loop = false,
+    muted = true,
+    controls = true,
+    className = '',
+    poster = '',
+    preload = "metadata", // Default to metadata for faster initial load
+    lowResSrc,
+  }, ref) => {
+
+    const [isHighRes, setIsHighRes] = React.useState(false);
+
+    const handleLoadedMetadata = () => {
+      // Optional: Load high-res version after the low-res is loaded
+      setIsHighRes(true);
+    };
+
     return (
       <video
         ref={ref}
-        src={src}
+        src={isHighRes ? src : (lowResSrc || src)} // Load low-res first if available
         autoPlay={autoplay}
         loop={loop}
         muted={muted}
@@ -25,6 +43,7 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
         className={className}
         poster={poster}
         preload={preload}
+        onLoadedMetadata={handleLoadedMetadata}
       >
         Your browser does not support the video tag.
       </video>

@@ -1,16 +1,19 @@
-import React, { useState, useEffect } from "react";
-import LocalVideo from "./LocalVideo";
+import React, { useState, useEffect, Suspense } from "react";
+import Lottie from "react-lottie-player";
 import { motion } from "framer-motion";
 import "./ProjectList.css";
+import loadingAnimation from "./loading.json"; // Path to your Lottie JSON file
+
+const LocalVideo = React.lazy(() => import("./LocalVideo"));
 
 interface ProjectListProps {
   onModalToggle: (isVisible: boolean) => void;
 }
 
 const projects = [
-  { name: 'Bang Abah', year: 2024, video: '/video/bang-abah-mobile-app.mp4' },
-  { name: 'Gomoku Game', year: 2023, video: '/video/gomoku-game.mp4' },
-  { name: 'Parion', year: 2023, video: '/video/parion.mp4' },
+  { name: 'Bang Abah', year: 2024, video: '/video/bang-abah-mobile-app.webm' },
+  { name: 'Gomoku Game', year: 2023, video: '/video/gomoku-game.webm' },
+  { name: 'Parion', year: 2023, video: '/video/parion.webm' },
 ];
 
 const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
@@ -22,8 +25,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
       setIsMobile(window.innerWidth < 768);
     };
     window.addEventListener('resize', updateMedia);
-    updateMedia(); // Call when component mounts
-
+    updateMedia();
     return () => window.removeEventListener('resize', updateMedia);
   }, []);
 
@@ -75,13 +77,33 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-          <LocalVideo
-            src={projects[selectedProject].video}
-            autoplay
-            controls={false}
-            muted={true}
-            className="w-full h-full rounded-lg"
-          />
+          <Suspense fallback={
+            <div className="flex items-center justify-center w-full h-full bg-transparent">
+            <Lottie
+              loop
+              animationData={loadingAnimation}
+              play
+              style={{
+                width: "100%",
+                height: "100%",
+                backgroundColor: "transparent",
+              }}
+              rendererSettings={{
+                preserveAspectRatio: "xMidYMid slice", 
+                clearCanvas: true, 
+              }}
+            />
+          </div>
+          }>
+            <LocalVideo
+              src={projects[selectedProject].video}
+              autoplay
+              controls={false}
+              muted={true}
+              className="w-full h-full rounded-lg"
+              preload="metadata"
+            />
+          </Suspense>
         </motion.div>
       )}
     </div>
