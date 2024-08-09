@@ -16,7 +16,6 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(({ src, autopla
       src={src}
       autoPlay={autoplay}
       loop={loop}
-      controls
       muted={muted}
       className={`w-full h-full ${className}`}
     >

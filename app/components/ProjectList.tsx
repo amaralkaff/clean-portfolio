@@ -88,9 +88,8 @@ const ProjectList: React.FC = () => {
             exit="exit"
             variants={modalVariants}
           >
-            <div
+            <div className="relative w-full h-full mx-auto max-w-4xl"
               ref={modalRef}
-              className="relative w-2/3 md:w-1/2 lg:w-1/3 bg-white p-4 rounded-lg shadow-lg"
             >
               <LocalVideo
                 ref={videoRef}
@@ -98,7 +97,7 @@ const ProjectList: React.FC = () => {
                 autoplay
                 loop
                 muted
-                className="w-full h-full rounded-lg p-4"
+                className="w-full h-full rounded-lg p-8"
               />
               <button
                 className="absolute top-1 right-2 text-2xl text-gray-400 hover:text-gray-600"
