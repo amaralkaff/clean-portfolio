@@ -25,7 +25,7 @@ const Home = () => {
 
   useEffect(() => {
     const preloadVideos = async () => {
-      const videoPromises = projects.map((project) => {
+      const videoPromises = projects.map((project, index) => {
         return new Promise<void>((resolve) => {
           const video = document.createElement("video");
           video.src = project.video;
@@ -40,7 +40,7 @@ const Home = () => {
 
       await Promise.all(videoPromises);
       setLoadingProgress(100);
-      setTimeout(() => setAssetsLoaded(true), 500);
+      setTimeout(() => setAssetsLoaded(true), 500); // Slight delay to smooth out the transition
     };
 
     preloadVideos();
@@ -56,10 +56,18 @@ const Home = () => {
 
   return (
     <div className="flex flex-col md:flex-row justify-center items-center min-h-screen">
-      <div className="order-2 md:order-1 w-full md:w-1/2 h-screen overflow-auto">
+      <div
+        className={`order-2 md:order-1 w-full md:w-1/2 h-screen overflow-auto transition-all duration-500 ${
+          modalVisible ? "md:w-full" : ""
+        }`}
+      >
         <ProjectList onModalToggle={setModalVisible} />
       </div>
-      <div className="order-1 md:order-2 w-full md:w-1/2">
+      <div
+        className={`order-1 md:order-2 w-full md:w-1/2 transition-all duration-500 ${
+          modalVisible ? "hidden md:block" : ""
+        }`}
+      >
         <MainContent isVisible={!modalVisible} />
       </div>
       <Footer />
