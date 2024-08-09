@@ -2,8 +2,11 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
+.font-retro {
+  font-family: 'Silkscreen', sans-serif;
+}
+
 body {
-  font-family: 'Press Start 2P', monospace;
   background-size: 300% 300%;
   background-image: linear-gradient(-45deg, #ffff 0%, #E5E7EB 25%, #ffff 50%, #E5E7EB 75%);
   animation: background-shift 10s ease infinite;

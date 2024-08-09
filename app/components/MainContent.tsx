@@ -6,12 +6,18 @@ interface MainContentProps {
   isVisible: boolean;
 }
 
+const fadeUpVariant = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+};
+
 const MainContent: React.FC<MainContentProps> = ({ isVisible }) => {
   return (
     <motion.div
-      className={`p-12 flex items-center justify-center h-full w-full md:w-2/3`}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: isVisible ? 1 : 0 }}
+      className="p-12 flex items-center justify-center h-full w-full md:w-2/3"
+      initial="hidden"
+      animate={isVisible ? "visible" : "hidden"}
+      variants={fadeUpVariant}
       transition={{ duration: 0.1 }}
     >
       <div className="text-center">

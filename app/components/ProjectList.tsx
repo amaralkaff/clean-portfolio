@@ -13,6 +13,11 @@ const projects = [
   { name: 'Parion', year: 2023, video: '/video/parion.webm' },
 ];
 
+const fadeUpVariant = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+};
+
 const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -38,10 +43,14 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
 
   return (
     <div className="relative flex flex-col w-full h-screen items-center px-4 overflow-auto justify-center md:w-2/3 min-h-screen">
-      <div className="space-y-4 w-full">
+      <div className="space-y-2 w-full">
         {projects.map((project, index) => (
-          <div
+          <motion.div
             key={index}
+            initial="hidden"
+            animate="visible"
+            variants={fadeUpVariant}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
             onClick={() => handleInteraction(index)}
             onMouseEnter={() => !isMobile && handleInteraction(index)}
             onMouseLeave={() => !isMobile && closeModal()}
@@ -49,12 +58,14 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
           >
             <span className="text-black text-md font-medium">{project.name}</span>
             <span className="text-gray-400 text-sm md:text-base">{project.year}</span>
-          </div>
+          </motion.div>
         ))}
       </div>
       {selectedProject !== null && (
         <motion.div
           className="fixed w-[100%] md:w-[40%] lg:w-[55%] h-auto bg-white rounded-lg flex justify-center items-center shadow-lg transition-all duration-300 md:right-2"
+          variants={fadeUpVariant}
+          transition={{ duration: 0.5 }}
         >
           <button
             className="fixed top-3 right-3 text-white bg-black rounded-full p-2 hover:text-gray-300 z-50 md:hidden"

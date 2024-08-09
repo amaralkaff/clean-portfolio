@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import TickerDigit from "../app/components/TickerDigit";
+import Lottie from "lottie-react";
 import Footer from "./components/Footer";
+import loadingAnimation from "../public/loading.json"; // Import your loading.json file
 
 // Dynamically load non-critical components
 const ProjectList = dynamic(() => import("./components/ProjectList"), {
@@ -48,8 +49,8 @@ const Home = () => {
 
   if (!assetsLoaded) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-white">
-        <TickerDigit countTo={loadingProgress} duration={1000} />
+      <div className="flex items-center justify-center min-h-screen">
+        <Lottie animationData={loadingAnimation} loop={true} />
       </div>
     );
   }
