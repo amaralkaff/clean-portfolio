@@ -5,8 +5,10 @@ import LocalVideo from './LocalVideo';
 
 const projects = [
   { name: 'Bang Abah', year: 2024, video: '/video/bang-abah-mobile-app.mp4' },
-  { name: 'iNES', year: 2024, video: '/video/ines.mp4' },
-  { name: 'SLAM', year: 2023, video: '/video/slam.mp4' },
+  { name: 'Parion', year: 2023, video: '/video/parion.mp4' },
+  { name: 'Gomoku Game', year: 2023, video: '/video/gomoku-game.mp4' },
+  // { name: 'iNES', year: 2024, video: '/video/ines.mp4' },
+  // { name: 'SLAM', year: 2023, video: '/video/slam.mp4' },
 ];
 
 const modalVariants = {
@@ -67,7 +69,7 @@ const ProjectList: React.FC = () => {
         {projects.map((project, index) => (
           <motion.li
             key={index}
-            className="flex justify-between items-center p-4 rounded-full cursor-pointer transition-transform hover:shadow-md"
+            className="flex justify-between items-center p-4 rounded-lg cursor-pointer transition-transform hover:shadow-md"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             onClick={() => handleClick(index)}
