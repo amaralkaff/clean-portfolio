@@ -1,114 +1,89 @@
-"use client";
-import React, { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import LocalVideo from './LocalVideo';
+import React, { useState, useEffect } from "react";
+import LocalVideo from "./LocalVideo";
+import { motion } from "framer-motion";
+import "./ProjectList.css";
+
+interface ProjectListProps {
+  onModalToggle: (isVisible: boolean) => void;
+}
 
 const projects = [
   { name: 'Bang Abah', year: 2024, video: '/video/bang-abah-mobile-app.mp4' },
-  { name: 'Parion', year: 2023, video: '/video/parion.mp4' },
   { name: 'Gomoku Game', year: 2023, video: '/video/gomoku-game.mp4' },
-  // { name: 'iNES', year: 2024, video: '/video/ines.mp4' },
-  // { name: 'SLAM', year: 2023, video: '/video/slam.mp4' },
+  { name: 'Parion', year: 2023, video: '/video/parion.mp4' },
 ];
 
-const modalVariants = {
-  hidden: { opacity: 0, transition: { ease: "easeOut", duration: 0.5 } },
-  visible: { opacity: 1, transition: { ease: "easeIn", duration: 0.5 } },
-  exit: { opacity: 0, transition: { ease: "easeOut", duration: 0.5 } },
-};
-
-const ProjectList: React.FC = () => {
+const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const modalRef = useRef<HTMLDivElement>(null);
-
-  const handleClick = (index: number) => {
-    setSelectedProject(index);
-  };
-
-  const handleClose = () => {
-    setSelectedProject(null);
-    if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
-    }
-  };
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const handleKeyDown = (event: KeyboardEvent) => {
-    if (event.key === "Escape") {
-      handleClose();
-    }
-  };
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const handleClickOutside = (event: MouseEvent) => {
-    if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-      handleClose();
-    }
-  };
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    if (selectedProject !== null) {
-      document.addEventListener("keydown", handleKeyDown);
-      document.addEventListener("mousedown", handleClickOutside);
-    } else {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("mousedown", handleClickOutside);
+    const updateMedia = () => {
+      setIsMobile(window.innerWidth < 768);
     };
-  }, [handleClickOutside, handleKeyDown, selectedProject]);
+    window.addEventListener('resize', updateMedia);
+    updateMedia(); // Call when component mounts
+
+    return () => window.removeEventListener('resize', updateMedia);
+  }, []);
+
+  const closeModal = () => {
+    setSelectedProject(null);
+    onModalToggle(false);
+  };
+
+  const handleInteraction = (index: number) => {
+    setSelectedProject(index);
+    onModalToggle(true);
+  };
 
   return (
-    <div className="relative w-full md:w-1/2 max-w-4xl mx-auto p-6 md:order-1 order-2">
-      <ul className="space-y-4 md:space-y-6">
+    <div className="relative flex flex-col w-full h-screen items-center p-8 overflow-auto justify-center">
+      <div className="space-y-4 w-full">
         {projects.map((project, index) => (
-          <motion.li
+          <div
             key={index}
-            className="flex justify-between items-center p-4 rounded-lg cursor-pointer transition-transform hover:shadow-md"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            onClick={() => handleClick(index)}
+            onClick={() => handleInteraction(index)}
+            onMouseEnter={() => !isMobile && handleInteraction(index)}
+            onMouseLeave={() => !isMobile && closeModal()}
+            className="button-style flex justify-between items-center w-full p-4 rounded-lg cursor-pointer hover:bg-gray-100"
           >
-            <span className="text-black text-md">{project.name}</span>
+            <span className="text-black text-md font-medium">{project.name}</span>
             <span className="text-gray-400 text-sm md:text-base">{project.year}</span>
-          </motion.li>
+          </div>
         ))}
-      </ul>
-      <AnimatePresence>
-        {selectedProject !== null && (
-          <motion.div
-            className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-md transition-opacity duration-300 ease-in-out"
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            variants={modalVariants}
+      </div>
+      {selectedProject !== null && (
+        <motion.div
+          className="modal modalVisible"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <button
+            className="close-button md:hidden fixed top-5 right-5 text-white bg-black rounded-full p-2 hover:text-gray-300"
+            onClick={closeModal}
           >
-            <div className="relative w-full h-full mx-auto max-w-4xl"
-              ref={modalRef}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="black"
+              strokeWidth={2}
+              className="h-6 w-6"
             >
-              <LocalVideo
-                ref={videoRef}
-                src={projects[selectedProject].video}
-                autoplay
-                loop
-                muted
-                className="w-full h-full rounded-lg p-8"
-              />
-              <button
-                className="absolute top-1 right-2 text-2xl text-gray-400 hover:text-gray-600"
-                onClick={handleClose}
-              >
-                &times;
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <LocalVideo
+            src={projects[selectedProject].video}
+            autoplay
+            controls={false}
+            muted={true}
+            className="w-full h-full rounded-lg"
+          />
+        </motion.div>
+      )}
     </div>
   );
 };
