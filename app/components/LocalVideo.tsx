@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect } from 'react';
+import React, { forwardRef } from 'react';
 
 interface LocalVideoProps {
   src: string;
@@ -32,20 +32,6 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
     const handleLoadedMetadata = () => {
       setIsHighRes(true);
     };
-
-    useEffect(() => {
-      const handleFullscreenChange = () => {
-        if (!document.fullscreenElement && onClose) {
-          onClose();
-        }
-      };
-
-      document.addEventListener('fullscreenchange', handleFullscreenChange);
-
-      return () => {
-        document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      };
-    }, [onClose]);
 
     return (
       <video
