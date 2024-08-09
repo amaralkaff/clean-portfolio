@@ -1,6 +1,5 @@
 import React, { useState, useEffect, Suspense } from "react";
 import { motion } from "framer-motion";
-import "./ProjectList.css";
 
 const LocalVideo = React.lazy(() => import("./LocalVideo"));
 
@@ -22,8 +21,8 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
     const updateMedia = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    window.addEventListener('resize', updateMedia);
     updateMedia();
+    window.addEventListener('resize', updateMedia);
     return () => window.removeEventListener('resize', updateMedia);
   }, []);
 
@@ -38,7 +37,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
   };
 
   return (
-    <div className="relative flex flex-col w-full h-screen items-center pl-4 pr-4 overflow-auto justify-center md:w-2/3 project-list-container">
+    <div className="relative flex flex-col w-full h-screen items-center px-4 overflow-auto justify-center md:w-2/3 min-h-screen">
       <div className="space-y-4 w-full">
         {projects.map((project, index) => (
           <div
@@ -46,7 +45,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
             onClick={() => handleInteraction(index)}
             onMouseEnter={() => !isMobile && handleInteraction(index)}
             onMouseLeave={() => !isMobile && closeModal()}
-            className="button-style flex justify-between items-center w-full p-4 rounded-lg cursor-pointer hover:bg-gray-100"
+            className="flex justify-between items-center w-full p-4 rounded-lg cursor-pointer hover:bg-gray-100"
           >
             <span className="text-black text-md font-medium">{project.name}</span>
             <span className="text-gray-400 text-sm md:text-base">{project.year}</span>
@@ -55,30 +54,29 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
       </div>
       {selectedProject !== null && (
         <motion.div
-          className="modal modalVisible"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          className="fixed w-[100%] md:w-[40%] lg:w-[55%] h-auto bg-white rounded-lg flex justify-center items-center shadow-lg transition-all duration-300 md:right-2"
         >
           <button
-            className="close-button md:hidden fixed top-5 right-5 text-white bg-black rounded-full p-2 hover:text-gray-300"
+            className="fixed top-3 right-3 text-white bg-black rounded-full p-2 hover:text-gray-300 z-50 md:hidden"
             onClick={closeModal}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
-              stroke="black"
+              stroke="white"
               strokeWidth={2}
               className="h-6 w-6"
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-          <Suspense fallback={<div className="w-full h-full bg-gray-200 rounded-lg" />}>
-            <div className={`video-container ${projects[selectedProject].name === 'Bang Abah' ? 'aspect-w-9 aspect-h-16' : ''}`}>
+          <Suspense fallback={
+            <div className={`relative w-full h-full ${projects[selectedProject]?.name === 'Bang Abah' ? 'aspect-w-9 aspect-h-16' : 'aspect-w-16 aspect-h-9'} bg-gray-200 rounded-lg`} />
+          }>
+            <div className={`relative w-full h-full ${projects[selectedProject]?.name === 'Bang Abah' ? 'aspect-w-9 aspect-h-16' : 'aspect-w-16 aspect-h-9'}`}>
               <LocalVideo
-                src={projects[selectedProject].video}
+                src={projects[selectedProject]?.video}
                 autoplay
                 controls={false}
                 muted={true}

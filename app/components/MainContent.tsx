@@ -1,4 +1,3 @@
-// MainContent.jsx
 import React from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -10,12 +9,10 @@ interface MainContentProps {
 const MainContent: React.FC<MainContentProps> = ({ isVisible }) => {
   return (
     <motion.div
-      className={`p-12 flex items-center justify-center h-full w-full md:w-2/3 ${
-        isVisible ? "" : ""
-      }`}
+      className={`p-12 flex items-center justify-center h-full w-full md:w-2/3`}
       initial={{ opacity: 0 }}
       animate={{ opacity: isVisible ? 1 : 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.1 }}
     >
       <div className="text-center">
         <div className="text-lg font-bold">
