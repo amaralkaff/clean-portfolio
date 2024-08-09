@@ -1,12 +1,65 @@
-// Home.jsx
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import TickerDigit from "../app/components/TickerDigit";
 import ProjectList from "./components/ProjectList";
 import MainContent from "./components/MainContent";
 import Footer from "./components/Footer";
 
 const Home = () => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+
+  // Define the projects array with video assets
+  const projects = [
+    { name: 'Bang Abah', year: 2024, video: '/video/bang-abah-mobile-app.webm' },
+    { name: 'Gomoku Game', year: 2023, video: '/video/gomoku-game.webm' },
+    { name: 'Parion', year: 2023, video: '/video/parion.webm' },
+  ];
+
+  useEffect(() => {
+    const preloadVideos = () => {
+      if (projects.length === 0) {
+        // If there are no projects, consider assets as loaded immediately
+        setLoadingProgress(100);
+        setAssetsLoaded(true);
+        return;
+      }
+
+      const videoPromises = projects.map((project) => {
+        return new Promise<void>((resolve) => {
+          const video = document.createElement('video');
+          video.src = project.video;
+          video.oncanplaythrough = () => {
+            resolve();
+            setLoadingProgress(prev => Math.min(prev + Math.floor(100 / projects.length), 100));
+          };
+          // In case the video loads instantly, we can listen to onloadeddata as a fallback
+          video.onloadeddata = () => {
+            resolve();
+            setLoadingProgress(prev => Math.min(prev + Math.floor(100 / projects.length), 100));
+          };
+        });
+      });
+
+      Promise.all(videoPromises).then(() => {
+        setLoadingProgress(100);
+        setTimeout(() => {
+          setAssetsLoaded(true);
+        }, 500); // A small delay for a smoother transition
+      });
+    };
+
+    preloadVideos();
+  }, []);
+
+  if (!assetsLoaded) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-white">
+        <TickerDigit countTo={loadingProgress} duration={1000} /> {/* Adjust duration as needed */}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col md:flex-row justify-center items-center min-h-screen">

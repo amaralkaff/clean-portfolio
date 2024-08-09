@@ -1,8 +1,6 @@
 import React, { useState, useEffect, Suspense } from "react";
-import Lottie from "react-lottie-player";
 import { motion } from "framer-motion";
 import "./ProjectList.css";
-import loadingAnimation from "./loading.json"; // Path to your Lottie JSON file
 
 const LocalVideo = React.lazy(() => import("./LocalVideo"));
 
@@ -77,24 +75,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-          <Suspense fallback={
-            <div className="flex items-center justify-center w-full h-full bg-transparent">
-            <Lottie
-              loop
-              animationData={loadingAnimation}
-              play
-              style={{
-                width: "100%",
-                height: "100%",
-                backgroundColor: "transparent",
-              }}
-              rendererSettings={{
-                preserveAspectRatio: "xMidYMid slice", 
-                clearCanvas: true, 
-              }}
-            />
-          </div>
-          }>
+          <Suspense fallback={<div className="w-full h-full bg-gray-200 rounded-lg" />}>
             <LocalVideo
               src={projects[selectedProject].video}
               autoplay
