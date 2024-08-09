@@ -54,16 +54,16 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
             onClick={() => handleInteraction(index)}
             onMouseEnter={() => !isMobile && handleInteraction(index)}
             onMouseLeave={() => !isMobile && closeModal()}
-            className="flex justify-between items-center w-full p-4 rounded-lg cursor-pointer hover:bg-gray-100"
+            className="flex justify-between items-center w-full p-4 rounded-lg hover:bg-gray-100"
           >
-            <span className="text-black text-md font-medium">{project.name}</span>
-            <span className="text-gray-400 text-sm md:text-base">{project.year}</span>
+            <span className="text-black text-md font-medium w-1/2 truncate">{project.name}</span>
+            <span className="text-gray-400 text-sm md:text-base w-1/4 text-right">{project.year}</span>
           </motion.div>
         ))}
       </div>
       {selectedProject !== null && (
         <motion.div
-          className="fixed w-full md:w-2/5 lg:w-2/3 h-auto bg-white rounded-lg flex justify-center items-center shadow-lg transition-all duration-300 md:right-2"
+          className="fixed w-full md:w-2/5 lg:w-2/4 h-auto bg-white rounded-lg flex justify-center items-center shadow-lg transition-all duration-300 md:right-12"
           variants={fadeUpVariant}
           transition={{ duration: 0.5 }}
         >
@@ -85,7 +85,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
           <Suspense fallback={
             <div className={`relative w-full h-full ${projects[selectedProject]?.name === 'Bang Abah' ? 'aspect-w-9 aspect-h-16' : 'aspect-w-16 aspect-h-9'} bg-gray-200 rounded-lg`} />
           }>
-            <div className={`relative w-full h-full ${projects[selectedProject]?.name === 'Bang Abah' ? 'aspect-w-9 aspect-h-16' : 'aspect-w-16 aspect-h-9'}`}>
+            <div className={`relative ${projects[selectedProject]?.name === 'Bang Abah' ? 'aspect-w-9 aspect-h-16' : 'aspect-w-16 aspect-h-9'}`}>
               <LocalVideo
                 src={projects[selectedProject]?.video}
                 autoplay
