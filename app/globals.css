@@ -40,22 +40,3 @@ body {
   color: gray;
   letter-spacing: 0.1em;
 }
-
-/* Add this to your ProjectList.css or equivalent CSS file */
-
-.video-container {
-  position: relative;
-  width: 100%;
-  padding-bottom: 177.78%; /* 16:9 aspect ratio (100% / (9/16)) */
-  background-color: #000; /* Optional: for a black background behind the video */
-}
-
-.video-container video {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  height: 100%;
-  width: auto;
-  object-fit: cover; /* Ensure the video covers the entire area without distortion */
-}

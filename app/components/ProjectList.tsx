@@ -38,7 +38,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
   };
 
   return (
-    <div className="relative flex flex-col w-full h-screen items-center p-8 overflow-auto justify-center md:w-2/3">
+    <div className="relative flex flex-col w-full h-screen items-center pl-4 pr-4 overflow-auto justify-center md:w-2/3">
       <div className="space-y-4 w-full">
         {projects.map((project, index) => (
           <div
@@ -84,6 +84,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
                 muted={true}
                 className="w-full h-full rounded-lg object-cover"
                 preload="metadata"
+                onClose={closeModal}
               />
             </div>
           </Suspense>

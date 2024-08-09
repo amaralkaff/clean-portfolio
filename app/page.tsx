@@ -24,23 +24,11 @@ const Home = () => {
   ];
 
   useEffect(() => {
-    const preloadVideos = () => {
-      if (projects.length === 0) {
-        setLoadingProgress(100);
-        setAssetsLoaded(true);
-        return;
-      }
-
+    const preloadVideos = async () => {
       const videoPromises = projects.map((project) => {
         return new Promise<void>((resolve) => {
           const video = document.createElement("video");
           video.src = project.video;
-          video.oncanplaythrough = () => {
-            resolve();
-            setLoadingProgress((prev) =>
-              Math.min(prev + Math.floor(100 / projects.length), 100)
-            );
-          };
           video.onloadeddata = () => {
             resolve();
             setLoadingProgress((prev) =>
@@ -50,12 +38,9 @@ const Home = () => {
         });
       });
 
-      Promise.all(videoPromises).then(() => {
-        setLoadingProgress(100);
-        setTimeout(() => {
-          setAssetsLoaded(true);
-        }, 500);
-      });
+      await Promise.all(videoPromises);
+      setLoadingProgress(100);
+      setTimeout(() => setAssetsLoaded(true), 500);
     };
 
     preloadVideos();

@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useEffect } from 'react';
 
 interface LocalVideoProps {
   src: string;
@@ -10,6 +10,7 @@ interface LocalVideoProps {
   poster?: string;
   preload?: "none" | "metadata" | "auto";
   lowResSrc?: string; // Add a prop for a low-resolution video source
+  onClose?: () => void; // Add an onClose prop to handle modal close
 }
 
 const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
@@ -23,6 +24,7 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
     poster = '',
     preload = "metadata", // Default to metadata for faster initial load
     lowResSrc,
+    onClose, // Receive the onClose prop
   }, ref) => {
 
     const [isHighRes, setIsHighRes] = React.useState(false);
@@ -31,6 +33,20 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
       // Optional: Load high-res version after the low-res is loaded
       setIsHighRes(true);
     };
+
+    useEffect(() => {
+      const handleFullscreenChange = () => {
+        if (!document.fullscreenElement && onClose) {
+          onClose(); // Call the onClose prop when exiting fullscreen
+        }
+      };
+
+      document.addEventListener('fullscreenchange', handleFullscreenChange);
+
+      return () => {
+        document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      };
+    }, [onClose]);
 
     return (
       <video
