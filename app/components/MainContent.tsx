@@ -10,7 +10,7 @@ interface MainContentProps {
 const MainContent: React.FC<MainContentProps> = ({ isVisible }) => {
   return (
     <motion.div
-      className={`p-8 flex items-center justify-center h-full md:h-screen ${
+      className={`p-12 flex items-center justify-center h-full w-full md:w-2/3 ${
         isVisible ? "" : ""
       }`}
       initial={{ opacity: 0 }}
