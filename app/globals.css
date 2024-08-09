@@ -3,18 +3,17 @@
 @import 'tailwindcss/utilities';
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-family: 'Press Start 2P', monospace;
   width: 100%;
   height: 100vh;
   background-size: 300% 300%;
-  background-image: linear-gradient(-45deg, #ffff 0%, #E5E7EB 25%, #ffff 50%, #E5E7EB 75%);
-  animation: background-shift 20s ease infinite;
+  background-image: linear-gradient(-25deg, #ffff 0%, #E5E7EB 25%, #ffff 50%, #E5E7EB 75%);
+  animation: background-shift 1s ease infinite alternate;
 }
 
 @keyframes background-shift {
@@ -35,9 +34,9 @@ body {
   align-items: center;
   width: 100%;
   height: 100%;
-  font-family: 'Press Start 2P', monospace; /* Use Press Start 2P font */
-  font-size: 3rem; /* Adjust the font size as needed */
+  font-family: 'Press Start 2P', monospace;
+  font-size: 3rem;
   font-weight: bold;
-  color: gray; /* Adjust the color as needed */
-  letter-spacing: 0.1em; /* Adjust letter spacing if needed */
+  color: gray;
+  letter-spacing: 0.1em;
 }
