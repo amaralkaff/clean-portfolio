@@ -12,8 +12,6 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/images/image.png", 
-        width: 1200,
-        height: 630,
         alt: "amangLy. Portfolio Preview Image",
       },
     ],
