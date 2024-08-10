@@ -1,13 +1,25 @@
 import { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { SpeedInsights } from "@vercel/speed-insights/next"
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "amangLy.",
   description: "amangLy. - A personal portfolio by amangly.",
+  openGraph: {
+    title: "amangLy.",
+    description: "amangLy. - A personal portfolio by amangly.",
+    images: [
+      {
+        url: "/images/image.png", 
+        width: 1200,
+        height: 630,
+        alt: "amangLy. Portfolio Preview Image",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
