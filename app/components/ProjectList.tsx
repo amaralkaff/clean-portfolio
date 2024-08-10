@@ -1,13 +1,12 @@
 import React, { useState, useEffect, Suspense, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 
-
-// Debounce function
-function debounce(func: { (): void; apply?: any; }, wait: number | undefined) {
-  let timeout: string | number | NodeJS.Timeout | undefined;
-  return  function(this: any, ...args: any) {
+// Debounce function with improved typing
+function debounce<T extends (...args: any[]) => void>(func: T, wait: number) {
+  let timeout: NodeJS.Timeout | null;
+  return function(this: any, ...args: Parameters<T>) {
     const context = this;
-    clearTimeout(timeout);
+    if (timeout) clearTimeout(timeout);
     timeout = setTimeout(() => func.apply(context, args), wait);
   };
 }
@@ -18,21 +17,24 @@ interface ProjectListProps {
   onModalToggle: (isVisible: boolean) => void;
 }
 
-const projects = useMemo(() => [
-  { name: "Bang Abah", year: 2024, video: "/video/bang-abah-mobile-app.webm" },
-  { name: "Gomoku Game", year: 2023, video: "/video/gomoku-game.webm" },
-  { name: "Parion", year: 2023, video: "/video/parion.webm" },
-], []);
-
-
-const fadeUpVariant = {
+const fadeUpVariant: Variants = {
   hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 }
+  visible: { opacity: 1, y: 0 },
 };
 
 const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+
+  // Memoizing the projects array
+  const projects = useMemo(
+    () => [
+      { name: "Bang Abah", year: 2024, video: "/video/bang-abah-mobile-app.webm" },
+      { name: "Gomoku Game", year: 2023, video: "/video/gomoku-game.webm" },
+      { name: "Parion", year: 2023, video: "/video/parion.webm" },
+    ],
+    []
+  );
 
   useEffect(() => {
     const updateMedia = debounce(() => {
