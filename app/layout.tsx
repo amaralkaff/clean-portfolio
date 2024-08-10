@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     images: [
       {
-        url: "/images/image.png", 
+        url: "https://www.amangly.pro/images/image.png",
         alt: "amangLy. Portfolio Preview Image",
       },
     ],
