@@ -1,17 +1,11 @@
 // pages/index.tsx
 "use client";
 import React, { useState, useEffect } from "react";
-import dynamic from "next/dynamic";
 import Lottie from "lottie-react";
 import Footer from "./components/Footer";
+import MainContent from "./components/MainContent";
+import ProjectList from "./components/ProjectList";
 import loadingAnimation from "../public/loading.json";
-
-const ProjectList = dynamic(() => import("./components/ProjectList"), {
-  ssr: false,
-});
-const MainContent = dynamic(() => import("./components/MainContent"), {
-  ssr: true,
-});
 
 const Home = () => {
   const [modalVisible, setModalVisible] = useState(false);
