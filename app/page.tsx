@@ -1,3 +1,4 @@
+// pages/index.tsx
 "use client";
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
@@ -7,10 +8,10 @@ import loadingAnimation from "../public/loading.json"; // Import your loading.js
 
 // Dynamically load non-critical components
 const ProjectList = dynamic(() => import("./components/ProjectList"), {
-  ssr: false, // Disable server-side rendering
+  ssr: true, // Enable server-side rendering
 });
 const MainContent = dynamic(() => import("./components/MainContent"), {
-  ssr: false,
+  ssr: true,
 });
 
 const Home = () => {
@@ -41,7 +42,7 @@ const Home = () => {
 
       await Promise.all(videoPromises);
       setLoadingProgress(100);
-      setTimeout(() => setAssetsLoaded(true), 500); // Slight delay to smooth out the transition
+      setTimeout(() => setAssetsLoaded(true), 500);
     };
 
     preloadVideos();

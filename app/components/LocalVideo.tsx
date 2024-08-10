@@ -1,4 +1,5 @@
-import React, { forwardRef, useEffect, useState } from 'react';
+// components/LocalVideo.tsx
+import React, { forwardRef } from 'react';
 
 interface LocalVideoProps {
   src: string;
@@ -18,33 +19,17 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
     autoplay = false,
     loop = false,
     muted = true,
-    controls = false,  // Controls are now disabled by default
+    controls = true,
     className = '',
     poster = '',
     preload = "metadata",
     lowResSrc,
   }, ref) => {
 
-    const [isHighRes, setIsHighRes] = useState(false);
-
-    const handleLoadedMetadata = () => {
-      setIsHighRes(true);
-    };
-
-    useEffect(() => {
-      const videoElement = ref?.current as HTMLVideoElement;
-
-      // Disable fullscreen on iOS
-      if (videoElement) {
-        videoElement.setAttribute('playsinline', 'true');
-        videoElement.setAttribute('webkit-playsinline', 'true');
-      }
-    }, [ref]);
-
     return (
       <video
         ref={ref}
-        src={isHighRes ? src : (lowResSrc || src)}
+        src={lowResSrc || src}
         autoPlay={autoplay}
         loop={loop}
         muted={muted}
@@ -52,9 +37,8 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
         className={className}
         poster={poster}
         preload={preload}
-        onLoadedMetadata={handleLoadedMetadata}
-        playsInline  // This will help prevent fullscreen on iOS
-        webkit-playsinline  // Specific to Safari
+        playsInline  // Disable fullscreen on iPhone
+        webkit-playsinline  // Additional iPhone support
       >
         Your browser does not support the video tag.
       </video>
