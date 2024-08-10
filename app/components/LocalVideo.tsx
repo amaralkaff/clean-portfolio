@@ -10,7 +10,6 @@ interface LocalVideoProps {
   poster?: string;
   preload?: "none" | "metadata" | "auto";
   lowResSrc?: string;
-  onClose?: () => void;
 }
 
 const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
@@ -19,18 +18,24 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
     autoplay = false,
     loop = false,
     muted = true,
-    controls = true,
+    controls = false,  // Controls set to false
     className = '',
     poster = '',
     preload = "metadata",
     lowResSrc,
-    onClose, 
   }, ref) => {
 
     const [isHighRes, setIsHighRes] = React.useState(false);
 
     const handleLoadedMetadata = () => {
       setIsHighRes(true);
+    };
+
+    const handlePlay = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
+      // Disable fullscreen on mobile
+      const videoElement = e.currentTarget;
+      videoElement.setAttribute('playsinline', 'true');
+      videoElement.setAttribute('webkit-playsinline', 'true');
     };
 
     return (
@@ -45,6 +50,7 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
         poster={poster}
         preload={preload}
         onLoadedMetadata={handleLoadedMetadata}
+        onPlay={handlePlay}
       >
         Your browser does not support the video tag.
       </video>

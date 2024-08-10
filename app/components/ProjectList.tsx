@@ -63,7 +63,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
       </div>
       {selectedProject !== null && (
         <motion.div
-          className="fixed w-full md:w-2/5 lg:w-2/4 h-auto bg-white rounded-lg flex justify-center items-center shadow-lg transition-all duration-300 md:right-12"
+          className="fixed inset-0 w-full h-full flex justify-center items-center transition-all duration-300 md:right-12 bg-white/60 md:bg-transparent backdrop-blur-md md:backdrop-blur-none"
           variants={fadeUpVariant}
           transition={{ duration: 0.5 }}
         >
@@ -89,11 +89,10 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
               <LocalVideo
                 src={projects[selectedProject]?.video}
                 autoplay
-                controls={false}
+                controls={false}  // Controls disabled
                 muted={true}
                 className="w-full h-full rounded-lg object-cover"
                 preload="metadata"
-                onClose={closeModal}
               />
             </div>
           </Suspense>
