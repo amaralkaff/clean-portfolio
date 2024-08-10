@@ -1,11 +1,11 @@
+// pages/index.tsx
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import Lottie from "lottie-react";
 import dynamic from "next/dynamic";
 import Footer from "./components/Footer";
 import loadingAnimation from "../public/loading.json";
 
-// Dynamically load components to reduce initial load
 const MainContent = dynamic(() => import("./components/MainContent"), {
   ssr: false,
 });
@@ -18,16 +18,15 @@ const Home = () => {
   const [assetsLoaded, setAssetsLoaded] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
 
-  // Wrap the projects array in useMemo to prevent re-creation on every render
-  const projects = useMemo(() => [
+  const projects = [
     { name: "Bang Abah", year: 2024, video: "/video/bang-abah-mobile-app.webm" },
     { name: "Gomoku Game", year: 2023, video: "/video/gomoku-game.webm" },
     { name: "Parion", year: 2023, video: "/video/parion.webm" },
-  ], []);
+  ];
 
   useEffect(() => {
     const preloadVideos = async () => {
-      const videoPromises = projects.map((project) => {
+      const videoPromises = projects.map((project, index) => {
         return new Promise<void>((resolve) => {
           const video = document.createElement("video");
           video.src = project.video;
