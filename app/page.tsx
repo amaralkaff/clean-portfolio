@@ -4,11 +4,10 @@ import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Lottie from "lottie-react";
 import Footer from "./components/Footer";
-import loadingAnimation from "../public/loading.json"; // Import your loading.json file
+import loadingAnimation from "../public/loading.json";
 
-// Dynamically load non-critical components
 const ProjectList = dynamic(() => import("./components/ProjectList"), {
-  ssr: true, // Enable server-side rendering
+  ssr: false,
 });
 const MainContent = dynamic(() => import("./components/MainContent"), {
   ssr: true,
@@ -31,7 +30,8 @@ const Home = () => {
         return new Promise<void>((resolve) => {
           const video = document.createElement("video");
           video.src = project.video;
-          video.onloadeddata = () => {
+          video.preload = "auto";
+          video.oncanplaythrough = () => {
             resolve();
             setLoadingProgress((prev) =>
               Math.min(prev + Math.floor(100 / projects.length), 100)
@@ -42,11 +42,11 @@ const Home = () => {
 
       await Promise.all(videoPromises);
       setLoadingProgress(100);
-      setTimeout(() => setAssetsLoaded(true), 500);
+      setTimeout(() => setAssetsLoaded(true), 500); // Slight delay to smooth out the transition
     };
 
     preloadVideos();
-  }, []);
+  }, [projects]);
 
   if (!assetsLoaded) {
     return (
