@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, Suspense, useMemo } from "react";
 import { motion } from "framer-motion";
 
 
@@ -18,11 +18,12 @@ interface ProjectListProps {
   onModalToggle: (isVisible: boolean) => void;
 }
 
-const projects = [
-  { name: 'Bang Abah', year: 2024, video: '/video/bang-abah-mobile-app.webm' },
-  { name: 'Gomoku Game', year: 2023, video: '/video/gomoku-game.webm' },
-  { name: 'Parion', year: 2023, video: '/video/parion.webm' },
-];
+const projects = useMemo(() => [
+  { name: "Bang Abah", year: 2024, video: "/video/bang-abah-mobile-app.webm" },
+  { name: "Gomoku Game", year: 2023, video: "/video/gomoku-game.webm" },
+  { name: "Parion", year: 2023, video: "/video/parion.webm" },
+], []);
+
 
 const fadeUpVariant = {
   hidden: { opacity: 0, y: 20 },
