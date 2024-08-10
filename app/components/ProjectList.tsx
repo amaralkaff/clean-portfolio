@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useMemo, Suspense } from "react";
+import React, { useState, useEffect, Suspense, useMemo } from "react";
 import { motion } from "framer-motion";
 
+// Debounce function
 function debounce(func: { (): void; apply?: any; }, wait: number | undefined) {
   let timeout: string | number | NodeJS.Timeout | undefined;
-  return  function(this: any, ...args: any) {
+  return function (this: any, ...args: any) {
     const context = this;
     clearTimeout(timeout);
     timeout = setTimeout(() => func.apply(context, args), wait);
@@ -25,6 +26,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
+  // Use useMemo to memoize the projects array
   const projects = useMemo(() => [
     { name: "Bang Abah", year: 2024, video: "/video/bang-abah-mobile-app.webm" },
     { name: "Gomoku Game", year: 2023, video: "/video/gomoku-game.webm" },
