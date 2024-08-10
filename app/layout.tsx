@@ -9,9 +9,11 @@ export const metadata: Metadata = {
   title: "amangLy.",
   description: "amangLy. - A personal portfolio by amangly.",
   openGraph: {
+    siteName: "amangLy.", // Site name for link previews
+    url: "https://amangly.pro", // Absolute URL for the site
     images: [
       {
-        url: "https://www.amangly.pro/images/image.png",
+        url: "https://amangly.pro/images/image.png",
         alt: "amangLy. Portfolio Preview Image",
       },
     ],
