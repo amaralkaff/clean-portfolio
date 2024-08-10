@@ -2,10 +2,17 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Lottie from "lottie-react";
+import dynamic from "next/dynamic";
 import Footer from "./components/Footer";
-import MainContent from "./components/MainContent";
-import ProjectList from "./components/ProjectList";
 import loadingAnimation from "../public/loading.json";
+
+// Dynamically load components to reduce initial load
+const MainContent = dynamic(() => import("./components/MainContent"), {
+  ssr: false,
+});
+const ProjectList = dynamic(() => import("./components/ProjectList"), {
+  ssr: false,
+});
 
 const Home = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -36,7 +43,7 @@ const Home = () => {
 
       await Promise.all(videoPromises);
       setLoadingProgress(100);
-      setTimeout(() => setAssetsLoaded(true), 500); // Slight delay to smooth out the transition
+      setTimeout(() => setAssetsLoaded(true), 500);
     };
 
     preloadVideos();

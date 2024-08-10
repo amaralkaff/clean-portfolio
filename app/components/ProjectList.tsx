@@ -1,6 +1,16 @@
-// components/ProjectList.tsx
 import React, { useState, useEffect, Suspense } from "react";
 import { motion } from "framer-motion";
+
+
+// Debounce function
+function debounce(func: { (): void; apply?: any; }, wait: number | undefined) {
+  let timeout: string | number | NodeJS.Timeout | undefined;
+  return  function(this: any, ...args: any) {
+    const context = this;
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(context, args), wait);
+  };
+}
 
 const LocalVideo = React.lazy(() => import("./LocalVideo"));
 
@@ -24,9 +34,10 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const updateMedia = () => {
+    const updateMedia = debounce(() => {
       setIsMobile(window.innerWidth < 768);
-    };
+    }, 200);
+
     updateMedia();
     window.addEventListener('resize', updateMedia);
     return () => window.removeEventListener('resize', updateMedia);
@@ -90,7 +101,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
               <LocalVideo
                 src={projects[selectedProject]?.video}
                 autoplay
-                controls={false}  // Disable controls
+                controls={false}
                 muted={true}
                 className="w-full h-full rounded-lg object-cover"
                 preload="metadata"
