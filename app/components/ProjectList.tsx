@@ -1,12 +1,11 @@
-import React, { useState, useEffect, Suspense, useMemo } from "react";
+import React, { useState, useEffect, useMemo, Suspense } from "react";
 import { motion } from "framer-motion";
 
-// Debounce function with improved typing
-function debounce<T extends (...args: any[]) => void>(func: T, wait: number) {
-  let timeout: NodeJS.Timeout | null;
-  return function(this: any, ...args: Parameters<T>) {
+function debounce(func: { (): void; apply?: any; }, wait: number | undefined) {
+  let timeout: string | number | NodeJS.Timeout | undefined;
+  return  function(this: any, ...args: any) {
     const context = this;
-    if (timeout) clearTimeout(timeout);
+    clearTimeout(timeout);
     timeout = setTimeout(() => func.apply(context, args), wait);
   };
 }
@@ -17,18 +16,20 @@ interface ProjectListProps {
   onModalToggle: (isVisible: boolean) => void;
 }
 
+const fadeUpVariant = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+};
+
 const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
-  const projects = useMemo(
-    () => [
-      { name: "Bang Abah", year: 2024, video: "/video/bang-abah-mobile-app.webm" },
-      { name: "Gomoku Game", year: 2023, video: "/video/gomoku-game.webm" },
-      { name: "Parion", year: 2023, video: "/video/parion.webm" },
-    ],
-    []
-  );
+  const projects = useMemo(() => [
+    { name: "Bang Abah", year: 2024, video: "/video/bang-abah-mobile-app.webm" },
+    { name: "Gomoku Game", year: 2023, video: "/video/gomoku-game.webm" },
+    { name: "Parion", year: 2023, video: "/video/parion.webm" },
+  ], []);
 
   useEffect(() => {
     const updateMedia = debounce(() => {
@@ -48,11 +49,6 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
   const handleInteraction = (index: number) => {
     setSelectedProject(index);
     onModalToggle(true);
-  };
-
-  const fadeUpVariant = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
   };
 
   return (
