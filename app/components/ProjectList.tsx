@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Suspense, useMemo } from "react";
-import { motion, Variants } from "framer-motion";
+import { motion } from "framer-motion";
 
 // Debounce function with improved typing
 function debounce<T extends (...args: any[]) => void>(func: T, wait: number) {
@@ -17,16 +17,10 @@ interface ProjectListProps {
   onModalToggle: (isVisible: boolean) => void;
 }
 
-const fadeUpVariant: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-};
-
 const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Memoizing the projects array
   const projects = useMemo(
     () => [
       { name: "Bang Abah", year: 2024, video: "/video/bang-abah-mobile-app.webm" },
@@ -54,6 +48,11 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
   const handleInteraction = (index: number) => {
     setSelectedProject(index);
     onModalToggle(true);
+  };
+
+  const fadeUpVariant = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
   };
 
   return (
