@@ -65,6 +65,11 @@ const ProjectList: React.FC<ProjectListProps> = ({
             url: "https://reactnative.dev",
           },
           {
+            name: "TypeScript",
+            logo: "/logos/typescript.png",
+            url: "https://www.typescriptlang.org",
+          }
+          {
             name: "Redux",
             logo: "/logos/redux.png",
             url: "https://redux.js.org",
