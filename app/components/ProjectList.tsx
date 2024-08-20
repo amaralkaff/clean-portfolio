@@ -1,6 +1,14 @@
-import React, { useState, useEffect, Suspense, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  Suspense,
+  useMemo,
+  useRef,
+  ReactElement,
+} from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 
 // Debounce function to handle resize events efficiently
 function debounce(func: () => void, wait: number) {
@@ -23,9 +31,14 @@ const fadeUpVariant = {
   visible: { opacity: 1, y: 0 },
 };
 
-const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
+const ProjectList: React.FC<ProjectListProps> = ({
+  onModalToggle,
+}): ReactElement => {
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const modalTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const modalRef = useRef<HTMLDivElement>(null);
 
   // Only run this effect on the client-side
   useEffect(() => {
@@ -46,10 +59,26 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
         year: 2024,
         video: "/video/bang-abah-mobile-app.webm",
         techStack: [
-          { name: "React Native", logo: "/logos/react.png" },
-          { name: "Redux", logo: "/logos/redux.png" },
-          { name: "Socket.io", logo: "/logos/socket.png" },
-          { name: "Google Maps", logo: "/logos/googlemap.png" },
+          {
+            name: "React Native",
+            logo: "/logos/react.png",
+            url: "https://reactnative.dev",
+          },
+          {
+            name: "Redux",
+            logo: "/logos/redux.png",
+            url: "https://redux.js.org",
+          },
+          {
+            name: "Socket.io",
+            logo: "/logos/socket.png",
+            url: "https://socket.io",
+          },
+          {
+            name: "Google Maps",
+            logo: "/logos/googlemap.png",
+            url: "https://maps.google.com",
+          },
         ],
       },
       {
@@ -57,9 +86,21 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
         year: 2023,
         video: "/video/gomoku-game.webm",
         techStack: [
-          { name: "React", logo: "/logos/react.png" },
-          { name: "JavaScript", logo: "/logos/javascript.png" },
-          { name: "Firebase Realtime Database", logo: "/logos/firebase.png" },
+          {
+            name: "React",
+            logo: "/logos/react.png",
+            url: "https://reactjs.org",
+          },
+          {
+            name: "JavaScript",
+            logo: "/logos/javascript.png",
+            url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript",
+          },
+          {
+            name: "Firebase Realtime Database",
+            logo: "/logos/firebase.png",
+            url: "https://firebase.google.com",
+          },
         ],
       },
       {
@@ -67,11 +108,31 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
         year: 2023,
         video: "/video/parion.webm",
         techStack: [
-          { name: "MongoDB", logo: "/logos/mongodb.png" },
-          { name: "NextJS", logo: "/logos/nextjs.png" },
-          { name: "Xendit", logo: "/logos/xendit.png" },
-          { name: "OpenAI", logo: "/logos/openai.png" },
-          { name: "Firestore", logo: "/logos/firebase.png" },
+          {
+            name: "MongoDB",
+            logo: "/logos/mongodb.png",
+            url: "https://mongodb.com",
+          },
+          {
+            name: "NextJS",
+            logo: "/logos/nextjs.png",
+            url: "https://nextjs.org",
+          },
+          {
+            name: "Xendit",
+            logo: "/logos/xendit.png",
+            url: "https://xendit.co",
+          },
+          {
+            name: "OpenAI",
+            logo: "/logos/openai.png",
+            url: "https://openai.com",
+          },
+          {
+            name: "Firestore",
+            logo: "/logos/firebase.png",
+            url: "https://firebase.google.com/docs/firestore",
+          },
         ],
       },
     ],
@@ -84,24 +145,44 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
   };
 
   const handleInteraction = (index: number) => {
+    clearTimeout(modalTimeoutRef.current!);
     setSelectedProject(index);
     onModalToggle(true);
   };
 
+  const handleMouseLeave = (e: React.MouseEvent) => {
+    // Ensure e.relatedTarget is a valid Node and check if it is inside modal or list container
+    if (
+      modalRef.current &&
+      e.relatedTarget instanceof Node &&
+      !modalRef.current.contains(e.relatedTarget) &&
+      !e.currentTarget.contains(e.relatedTarget)
+    ) {
+      e.stopPropagation(); // Stop event propagation
+      modalTimeoutRef.current = setTimeout(() => {
+        closeModal();
+      }, 5000); // 5 seconds delay
+    }
+  };
+
   return (
-    <div className="relative flex flex-col w-full h-screen items-center px-4 overflow-auto justify-center md:w-2/3 min-h-screen">
-      <div className="space-y-2 w-full">
+    <div
+      className="relative flex flex-col w-full h-screen items-center px-4 overflow-auto justify-center md:w-2/3 min-h-screen"
+      onMouseLeave={handleMouseLeave}
+    >
+      <div className="space-y-2 w-full cursor-none">
+        {" "}
+        {/* Hides cursor when hovering over the list */}
         {projects.map((project, index) => (
           <motion.div
             key={index}
             initial="hidden"
             animate="visible"
             variants={fadeUpVariant}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            onClick={() => handleInteraction(index)}
-            onMouseEnter={() => !isMobile && handleInteraction(index)}
-            onMouseLeave={() => !isMobile && closeModal()}
-            className="flex justify-between items-center w-full p-4 rounded-lg hover:bg-gray-100 cursor-pointer"
+            transition={{ duration: 0.3, delay: index * 0.1 }}
+            whileHover={{ scale: 1.03 }}
+            onMouseEnter={() => handleInteraction(index)}
+            className="flex justify-between items-center w-full p-4 rounded-lg hover:bg-gray-100 cursor-default" // Changed cursor to default
           >
             <span className="text-black text-md font-medium w-1/2 truncate">
               {project.name}
@@ -114,9 +195,11 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
       </div>
       {selectedProject !== null && (
         <motion.div
+          ref={modalRef}
           className="fixed w-full md:w-2/5 lg:w-2/4 h-auto bg-transparent rounded-lg flex flex-col justify-center items-center transition-all duration-300 md:right-12 p-4"
           variants={fadeUpVariant}
           transition={{ duration: 0.5 }}
+          onMouseLeave={handleMouseLeave} // Also handle mouse leave from the modal
         >
           <button
             className="fixed top-3 right-3 text-white bg-black rounded-full p-2 hover:text-gray-300 z-50 md:hidden"
@@ -167,14 +250,16 @@ const ProjectList: React.FC<ProjectListProps> = ({ onModalToggle }) => {
             <div className="flex flex-wrap justify-center mt-4">
               {projects[selectedProject]?.techStack.map((tech, index) => (
                 <div key={index} className="flex items-center m-2">
-                  <Image
-                    src={tech.logo}
-                    alt={tech.name}
-                    width={24} // Define image width explicitly for better optimization
-                    height={24} // Define image height explicitly for better optimization
-                    className="mr-2"
-                  />
-                  <span className="text-sm text-gray-800">{tech.name}</span>
+                  <Link href={tech.url} passHref>
+                    <Image
+                      src={tech.logo}
+                      alt={tech.name}
+                      width={30} // Increased image width
+                      height={30} // Increased image height
+                      className="mr-2 hover:opacity-80"
+                    />
+                  </Link>
+                  <span className="text-md text-gray-800">{tech.name}</span>
                 </div>
               ))}
             </div>
