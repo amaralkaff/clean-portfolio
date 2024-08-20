@@ -68,7 +68,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
             name: "TypeScript",
             logo: "/logos/typescript.png",
             url: "https://www.typescriptlang.org",
-          }
+          },
           {
             name: "Redux",
             logo: "/logos/redux.png",
