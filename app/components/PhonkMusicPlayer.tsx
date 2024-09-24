@@ -49,13 +49,12 @@ const PhonkMusicPlayer: React.FC = () => {
   }, []);
 
   const togglePlay = () => setIsPlaying(!isPlaying);
-
   const nextTrack = () => {
     setCurrentTrack((prev) => (prev + 1) % tracks.length);
   };
 
   return (
-    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray bg-opacity-80 backdrop-blur-sm text-black px-4 rounded-full flex items-center space-x-4 z-50 transition-all duration-300 hover:bg-opacity-100">
+    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray bg-opacity-80 backdrop-blur-sm text-black px-4 py-2 rounded-full flex items-center space-x-4 z-50 transition-all duration-300 hover:bg-opacity-100">
       <audio ref={audioRef}>
         <source src={tracks[currentTrack].path} type="audio/mpeg" />
       </audio>
@@ -65,8 +64,8 @@ const PhonkMusicPlayer: React.FC = () => {
       >
         {isPlaying ? <Pause size={18} /> : <Play size={18} />}
       </button>
-      <div className="flex flex-col w-48">
-        <div className="text-xs font-medium truncate">
+      <div className="flex flex-col w-48 items-center"> {/* Added items-center here */}
+        <div className="text-xs font-medium truncate text-center w-full"> {/* Added text-center and w-full here */}
           {tracks[currentTrack].name}
         </div>
         <div className="w-full h-1 bg-gray-200 rounded-full mt-1 overflow-hidden">
