@@ -1,3 +1,4 @@
+// File: app/components/ProjectList.tsx
 import React, {
   useState,
   useEffect,
@@ -156,7 +157,6 @@ const ProjectList: React.FC<ProjectListProps> = ({
   };
 
   const handleMouseLeave = (e: React.MouseEvent) => {
-    // Ensure e.relatedTarget is a valid Node and check if it is inside modal or list container
     if (
       modalRef.current &&
       e.relatedTarget instanceof Node &&
@@ -176,8 +176,6 @@ const ProjectList: React.FC<ProjectListProps> = ({
       onMouseLeave={handleMouseLeave}
     >
       <div className="space-y-2 w-full cursor-none">
-        {" "}
-        {/* Hides cursor when hovering over the list */}
         {projects.map((project, index) => (
           <motion.div
             key={index}
@@ -187,7 +185,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
             transition={{ duration: 0.3, delay: index * 0.1 }}
             whileHover={{ scale: 1.03 }}
             onMouseEnter={() => handleInteraction(index)}
-            className="flex justify-between items-center w-full p-4 rounded-lg hover:bg-gray-100 cursor-default" // Changed cursor to default
+            className="flex justify-between items-center w-full p-4 rounded-lg hover:bg-gray-100 cursor-default"
           >
             <span className="text-black text-md font-medium w-1/2 truncate">
               {project.name}
@@ -204,7 +202,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
           className="fixed w-full md:w-2/5 lg:w-2/4 h-auto bg-transparent rounded-lg flex flex-col justify-center items-center transition-all duration-300 md:right-12 p-4"
           variants={fadeUpVariant}
           transition={{ duration: 0.5 }}
-          onMouseLeave={handleMouseLeave} // Also handle mouse leave from the modal
+          onMouseLeave={handleMouseLeave}
         >
           <button
             className="fixed top-3 right-3 text-white bg-black rounded-full p-2 hover:text-gray-300 z-50 md:hidden"
@@ -259,8 +257,8 @@ const ProjectList: React.FC<ProjectListProps> = ({
                     <Image
                       src={tech.logo}
                       alt={tech.name}
-                      width={30} // Increased image width
-                      height={30} // Increased image height
+                      width={30}
+                      height={30}
                       className="mr-2 hover:opacity-80"
                     />
                   </Link>

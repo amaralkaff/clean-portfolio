@@ -1,16 +1,17 @@
+// File: app/page.tsx
 "use client";
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
 import Footer from "./components/Footer";
-import loadingAnimation from "../public/loading.json";
-import AnimatedCursor from "react-animated-cursor";
-import Lottie from "lottie-react";
+import PhonkMusicPlayer from "./components/PhonkMusicPlayer";
 
-// Dynamically load components to reduce initial load
 const MainContent = dynamic(() => import("./components/MainContent"), {
   ssr: false,
 });
 const ProjectList = dynamic(() => import("./components/ProjectList"), {
+  ssr: false,
+});
+const LottieWrapper = dynamic(() => import("./components/LottieWrapper"), {
   ssr: false,
 });
 
@@ -18,8 +19,7 @@ const Home = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [assetsLoaded, setAssetsLoaded] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
-
-  // Wrap the projects array in useMemo to prevent re-creation on every render
+  
   const projects = useMemo(
     () => [
       {
@@ -48,39 +48,23 @@ const Home = () => {
           };
         });
       });
-
       await Promise.all(videoPromises);
       setLoadingProgress(100);
       setTimeout(() => setAssetsLoaded(true), 500);
     };
-
     preloadVideos();
   }, [projects]);
 
   if (!assetsLoaded) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <Lottie animationData={loadingAnimation} loop={true} />
+        <LottieWrapper />
       </div>
     );
   }
 
   return (
     <div className="flex flex-col md:flex-row justify-center items-center min-h-screen bg-gray-50">
-      <AnimatedCursor
-        innerSize={8}
-        outerSize={35}
-        color="255, 255, 255"
-        outerAlpha={0.2}
-        innerScale={1}
-        outerScale={4}
-        outerStyle={{
-          border: "2px solid #333",
-        }}
-        innerStyle={{
-          backgroundColor: "#333",
-        }}
-      />
       <div
         className={`order-2 md:order-1 w-full md:w-1/2 h-screen overflow-auto transition-all duration-500 ${
           modalVisible ? "md:w-full" : ""
@@ -96,6 +80,7 @@ const Home = () => {
         <MainContent isVisible={!modalVisible} />
       </div>
       <Footer />
+      <PhonkMusicPlayer />
     </div>
   );
 };
