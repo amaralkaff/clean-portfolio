@@ -20,21 +20,8 @@ const Home = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [assetsLoaded, setAssetsLoaded] = useState(false);
 
-  const projects = useMemo(
-    () => [
-      {
-        name: "Bang Abah",
-        year: 2024,
-        video: "/video/bang-abah-mobile-app.webm",
-      },
-      { name: "Gomoku Game", year: 2023, video: "/video/gomoku-game.webm" },
-      { name: "Parion", year: 2023, video: "/video/parion.webm" },
-    ],
-    []
-  );
 
   useEffect(() => {
-    // Simulate asset loading
     const timer = setTimeout(() => {
       setAssetsLoaded(true);
     }, 1000);
