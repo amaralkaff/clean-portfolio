@@ -54,7 +54,7 @@ const PhonkMusicPlayer: React.FC = () => {
   };
 
   return (
-    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray bg-opacity-80 backdrop-blur-sm text-black px-4 py-2 rounded-full flex items-center space-x-4 z-50 transition-all duration-300 hover:bg-opacity-100">
+    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray bg-opacity-80 backdrop-blur-sm text-black px-4 rounded-full flex items-center space-x-4 z-50 transition-all duration-300 hover:bg-opacity-100">
       <audio ref={audioRef}>
         <source src={tracks[currentTrack].path} type="audio/mpeg" />
       </audio>
