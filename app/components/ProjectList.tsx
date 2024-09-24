@@ -205,7 +205,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
           onMouseLeave={handleMouseLeave}
         >
           <button
-            className="fixed top-3 right-3 text-white bg-black rounded-full p-2 hover:text-gray-300 z-50 md:hidden"
+            className="fixed top-12 md:top-3 right-3 text-white bg-black rounded-full p-2 hover:text-gray-300 z-50 md:hidden"
             onClick={closeModal}
           >
             <svg
