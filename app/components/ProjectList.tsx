@@ -184,7 +184,8 @@ const ProjectList: React.FC<ProjectListProps> = ({
             variants={fadeUpVariant}
             transition={{ duration: 0.3, delay: index * 0.1 }}
             whileHover={{ scale: 1.03 }}
-            onMouseEnter={() => handleInteraction(index)}
+            onMouseEnter={() => !isMobile && handleInteraction(index)}
+            onClick={() => isMobile && handleInteraction(index)}
             className="flex justify-between items-center w-full p-4 rounded-lg hover:bg-gray-100 cursor-default"
           >
             <span className="text-black text-md font-medium w-1/2 truncate">
@@ -199,7 +200,9 @@ const ProjectList: React.FC<ProjectListProps> = ({
       {selectedProject !== null && (
         <motion.div
           ref={modalRef}
-          className="fixed w-full md:w-2/5 lg:w-2/4 h-auto bg-transparent rounded-lg flex flex-col justify-center items-center transition-all duration-300 md:right-12 p-4"
+          className={`fixed w-full md:w-2/5 lg:w-2/4 h-auto rounded-lg flex flex-col justify-center items-center transition-all duration-300 md:right-12 p-4 ${
+            isMobile ? "inset-0 bg-black bg-opacity-50" : "bg-transparent"
+          }`}
           variants={fadeUpVariant}
           transition={{ duration: 0.5 }}
           onMouseLeave={handleMouseLeave}
