@@ -175,7 +175,11 @@ const ProjectList: React.FC<ProjectListProps> = ({
       className="relative flex flex-col w-full h-screen items-center px-4 overflow-auto justify-center md:w-2/3 min-h-screen"
       onMouseLeave={handleMouseLeave}
     >
-      <div className="space-y-2 w-full cursor-none">
+      <div
+        className={`space-y-2 w-full cursor-none ${
+          isMobile && selectedProject !== null ? "hidden" : ""
+        }`}
+      >
         {projects.map((project, index) => (
           <motion.div
             key={index}
@@ -200,8 +204,8 @@ const ProjectList: React.FC<ProjectListProps> = ({
       {selectedProject !== null && (
         <motion.div
           ref={modalRef}
-          className={`fixed w-full md:w-2/5 lg:w-2/4 h-auto rounded-lg flex flex-col justify-center items-center transition-all duration-300 md:right-12 p-4 ${
-            isMobile ? "inset-0 bg-black bg-opacity-50" : "bg-transparent"
+          className={`fixed w-full md:w-2/5 lg:w-2/4 h-auto bg-transparent rounded-lg flex flex-col justify-center items-center transition-all duration-300 md:right-12 p-4 ${
+            isMobile ? "inset-0 bg-black bg-opacity-50" : ""
           }`}
           variants={fadeUpVariant}
           transition={{ duration: 0.5 }}
