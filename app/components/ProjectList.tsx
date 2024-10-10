@@ -56,6 +56,33 @@ const ProjectList: React.FC<ProjectListProps> = ({
   const projects = useMemo(
     () => [
       {
+        name: "EWS Earthquake",
+        year: 2024,
+        video: "/video/ews-earthquake.webm",
+        techStack: [
+          {
+            name: "React Native",
+            logo: "/logos/react.png",
+            url: "https://reactnative.dev",
+          },
+          {
+            name: "Firebase Realtime Database",
+            logo: "/logos/firebase.png",
+            url: "https://firebase.google.com/docs/database",
+          },
+          {
+            name: "Mapbox",
+            logo: "/logos/mapbox.png",
+            url: "https://www.mapbox.com",
+          },
+          {
+            name: "BMKG API",
+            logo: "/logos/bmkg.png",
+            url: "https://data.bmkg.go.id",
+          },
+        ],
+      },
+      {
         name: "Bang Abah",
         year: 2024,
         video: "/video/bang-abah-mobile-app.webm",
