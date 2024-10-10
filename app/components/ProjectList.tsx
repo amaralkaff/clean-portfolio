@@ -66,14 +66,14 @@ const ProjectList: React.FC<ProjectListProps> = ({
             url: "https://reactnative.dev",
           },
           {
-            name: "Firebase Realtime Database",
-            logo: "/logos/firebase.png",
-            url: "https://firebase.google.com/docs/database",
-          },
-          {
             name: "TypeScript",
             logo: "/logos/typescript.png",
             url: "https://www.typescriptlang.org",
+          },
+          {
+            name: "Firebase Realtime Database",
+            logo: "/logos/firebase.png",
+            url: "https://firebase.google.com/docs/database",
           },
           {
             name: "Mapbox",
