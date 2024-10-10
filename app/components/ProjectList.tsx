@@ -147,14 +147,14 @@ const ProjectList: React.FC<ProjectListProps> = ({
         video: "/video/parion.webm",
         techStack: [
           {
-            name: "MongoDB",
-            logo: "/logos/mongodb.png",
-            url: "https://mongodb.com",
-          },
-          {
             name: "NextJS",
             logo: "/logos/nextjs.png",
             url: "https://nextjs.org",
+          },
+          {
+            name: "MongoDB",
+            logo: "/logos/mongodb.png",
+            url: "https://mongodb.com",
           },
           {
             name: "Xendit",
