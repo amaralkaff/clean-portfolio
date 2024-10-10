@@ -71,6 +71,11 @@ const ProjectList: React.FC<ProjectListProps> = ({
             url: "https://firebase.google.com/docs/database",
           },
           {
+            name: "TypeScript",
+            logo: "/logos/typescript.png",
+            url: "https://www.typescriptlang.org",
+          },
+          {
             name: "Mapbox",
             logo: "/logos/mapbox.png",
             url: "https://www.mapbox.com",
