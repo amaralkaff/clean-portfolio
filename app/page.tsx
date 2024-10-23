@@ -1,34 +1,29 @@
 "use client";
-import React, { useState, useEffect, useMemo, Suspense } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
 
-// Dynamically import LottieLoader
-const LottieLoader = dynamic(() => import("./components/CustomLottie"), { ssr: false });
-
-// Optimized dynamic imports
-const MainContent = dynamic(() => import("./components/MainContent"), {
+const LottieLoader = dynamic(() => import("./components/CustomLottie"), { 
+  ssr: false 
 });
-
-const ProjectList = dynamic(() => import("./components/ProjectList"), {
-});
-
-// Lazy load non-critical components
+const MainContent = dynamic(() => import("./components/MainContent"));
+const ProjectList = dynamic(() => import("./components/ProjectList"));
 const Footer = dynamic(() => import("./components/Footer"));
 const PhonkMusicPlayer = dynamic(() => import("./components/PhonkMusicPlayer"));
 
 const Home = () => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [assetsLoaded, setAssetsLoaded] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Simple loading timeout for smooth transition
     const timer = setTimeout(() => {
-      setAssetsLoaded(true);
-    }, 1000);
+      setIsLoading(false);
+    }, 2000); // 2 seconds is enough for a polished feel
+
     return () => clearTimeout(timer);
   }, []);
 
-  if (!assetsLoaded) {
+  if (isLoading) {
     return <LottieLoader />;
   }
 
@@ -43,6 +38,7 @@ const Home = () => {
           <ProjectList onModalToggle={setModalVisible} />
         </div>
       </Suspense>
+      
       <Suspense fallback={<LottieLoader />}>
         <div
           className={`order-1 md:order-2 w-full md:w-1/2 transition-all duration-500 ${
@@ -52,6 +48,7 @@ const Home = () => {
           <MainContent isVisible={!modalVisible} />
         </div>
       </Suspense>
+      
       <Footer />
       <PhonkMusicPlayer />
     </div>
