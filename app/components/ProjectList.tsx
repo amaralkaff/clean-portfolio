@@ -55,6 +55,30 @@ const ProjectList: React.FC<ProjectListProps> = ({
   // Memoize the projects array to prevent unnecessary re-renders
   const projects = useMemo(
     () => [
+      // add project name Workout AI
+      {
+        name: "Workout AI",
+        year: 2024,
+        video: "/video/workout-ai.webm",
+        techStack: [
+          {
+            name: "Flutter",
+            logo: "/logos/flutter.png",
+            url: "https://flutter.dev",
+          },
+          {
+            name: "MLKit",
+            logo: "/logos/mlkit.png",
+            url: "https://firebase.google.com/docs/ml-kit",
+          },
+          {
+            name: "MongoDB",
+            logo: "/logos/mongodb.png",
+            url: "https://mongodb.com",
+          },
+          
+        ],
+      },
       {
         name: "EWS Earthquake",
         year: 2024,
