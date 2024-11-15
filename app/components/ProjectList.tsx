@@ -1,25 +1,15 @@
-// File: app/components/ProjectList.tsx
 import React, {
   useState,
   useEffect,
   Suspense,
-  useMemo,
   useRef,
   ReactElement,
 } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-
-// Debounce function to handle resize events efficiently
-function debounce(func: () => void, wait: number) {
-  let timeout: NodeJS.Timeout;
-  return function (this: any, ...args: any) {
-    const context = this;
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(context, args), wait);
-  };
-}
+import CircuitAnimation from "./CircuitAnimation";
+import { projects } from "./ProjectData";
 
 const LocalVideo = React.lazy(() => import("./LocalVideo"));
 
@@ -37,225 +27,61 @@ const ProjectList: React.FC<ProjectListProps> = ({
 }): ReactElement => {
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
-  const modalTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isActive, setIsActive] = useState(false);
+  const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
-  // Only run this effect on the client-side
   useEffect(() => {
-    const updateMedia = debounce(() => {
+    const updateMedia = () => {
       setIsMobile(window.innerWidth < 768);
-    }, 200);
+    };
 
     updateMedia();
     window.addEventListener("resize", updateMedia);
     return () => window.removeEventListener("resize", updateMedia);
   }, []);
 
-  // Memoize the projects array to prevent unnecessary re-renders
-  const projects = useMemo(
-    () => [
-      {
-        name: "Workout AI",
-        year: 2024,
-        video: "/video/workout-ai.webm",
-        techStack: [
-          {
-            name: "Flutter",
-            logo: "/logos/flutter.png",
-            url: "https://flutter.dev",
-          },
-          {
-            name: "MLKit",
-            logo: "/logos/mlkit.png",
-            url: "https://firebase.google.com/docs/ml-kit",
-          },
-          {
-            name: "MongoDB",
-            logo: "/logos/mongodb.png",
-            url: "https://mongodb.com",
-          },
-        ],
-      },
-      {
-        name: "EWS Earthquake",
-        year: 2024,
-        video: "/video/ews-earthquake.webm",
-        techStack: [
-          {
-            name: "React Native",
-            logo: "/logos/react.png",
-            url: "https://reactnative.dev",
-          },
-          {
-            name: "TypeScript",
-            logo: "/logos/typescript.png",
-            url: "https://www.typescriptlang.org",
-          },
-          {
-            name: "Firebase Realtime Database",
-            logo: "/logos/firebase.png",
-            url: "https://firebase.google.com/docs/database",
-          },
-          {
-            name: "Mapbox",
-            logo: "/logos/mapbox.png",
-            url: "https://www.mapbox.com",
-          },
-          {
-            name: "BMKG API",
-            logo: "/logos/bmkg.png",
-            url: "https://data.bmkg.go.id",
-          },
-        ],
-      },
-      {
-        name: "Bang Abah",
-        year: 2024,
-        video: "/video/bang-abah-mobile-app.webm",
-        techStack: [
-          {
-            name: "React Native",
-            logo: "/logos/react.png",
-            url: "https://reactnative.dev",
-          },
-          {
-            name: "TypeScript",
-            logo: "/logos/typescript.png",
-            url: "https://www.typescriptlang.org",
-          },
-          {
-            name: "Redux",
-            logo: "/logos/redux.png",
-            url: "https://redux.js.org",
-          },
-          {
-            name: "Socket.io",
-            logo: "/logos/socket.png",
-            url: "https://socket.io",
-          },
-          {
-            name: "Google Maps",
-            logo: "/logos/googlemap.png",
-            url: "https://maps.google.com",
-          },
-        ],
-      },
-      {
-        name: "Gomoku Game",
-        year: 2023,
-        video: "/video/gomoku-game.webm",
-        techStack: [
-          {
-            name: "React",
-            logo: "/logos/react.png",
-            url: "https://reactjs.org",
-          },
-          {
-            name: "JavaScript",
-            logo: "/logos/javascript.png",
-            url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript",
-          },
-          {
-            name: "Firebase Realtime Database",
-            logo: "/logos/firebase.png",
-            url: "https://firebase.google.com",
-          },
-        ],
-      },
-      {
-        name: "Parion",
-        year: 2023,
-        video: "/video/parion.webm",
-        techStack: [
-          {
-            name: "NextJS",
-            logo: "/logos/nextjs.png",
-            url: "https://nextjs.org",
-          },
-          {
-            name: "MongoDB",
-            logo: "/logos/mongodb.png",
-            url: "https://mongodb.com",
-          },
-          {
-            name: "Xendit",
-            logo: "/logos/xendit.png",
-            url: "https://xendit.co",
-          },
-          {
-            name: "OpenAI",
-            logo: "/logos/openai.png",
-            url: "https://openai.com",
-          },
-          {
-            name: "Firestore",
-            logo: "/logos/firebase.png",
-            url: "https://firebase.google.com/docs/firestore",
-          },
-        ],
-      },
-    ],
-    []
-  );
-
   const closeModal = () => {
     setSelectedProject(null);
     onModalToggle(false);
-    setIsHovering(false);
+    setIsActive(false);
   };
 
   const handleInteraction = (index: number) => {
-    if (modalTimeoutRef.current) {
-      clearTimeout(modalTimeoutRef.current);
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
     }
     setSelectedProject(index);
-    setIsHovering(true);
+    setIsActive(true);
     onModalToggle(true);
   };
 
-  const startCloseTimer = () => {
-    modalTimeoutRef.current = setTimeout(() => {
-      if (!isHovering) {
-        closeModal();
+  useEffect(() => {
+    if (!isActive && selectedProject !== null) {
+      closeTimerRef.current = setTimeout(closeModal, 200);
+    }
+    return () => {
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current);
       }
-    }, 3000); // 3 second delay before closing
-  };
-
-  const handleMouseLeave = (e: React.MouseEvent) => {
-    if (
-      modalRef.current &&
-      e.relatedTarget instanceof Node &&
-      !modalRef.current.contains(e.relatedTarget) &&
-      !e.currentTarget.contains(e.relatedTarget)
-    ) {
-      e.stopPropagation();
-      setIsHovering(false);
-      startCloseTimer();
-    }
-  };
-
-  const handleModalMouseEnter = () => {
-    if (modalTimeoutRef.current) {
-      clearTimeout(modalTimeoutRef.current);
-    }
-    setIsHovering(true);
-  };
-
-  const handleModalMouseLeave = () => {
-    setIsHovering(false);
-    startCloseTimer();
-  };
+    };
+  }, [isActive]);
 
   return (
     <div
       className="relative flex flex-col w-full h-screen items-center px-4 overflow-auto justify-center md:w-2/3 min-h-screen"
-      onMouseLeave={handleMouseLeave}
+      onMouseLeave={() => setIsActive(false)}
     >
+      <CircuitAnimation 
+        isActive={selectedProject !== null} 
+        targetRef={modalRef} 
+      />
+      
       <div
-        className={`space-y-2 w-full cursor-none ${
+        className={`space-y-2 w-full cursor-none z-10 ${
           isMobile && selectedProject !== null ? "hidden" : ""
         }`}
+        onMouseEnter={() => setIsActive(true)}
       >
         {projects.map((project, index) => (
           <motion.div
@@ -278,16 +104,15 @@ const ProjectList: React.FC<ProjectListProps> = ({
           </motion.div>
         ))}
       </div>
+
       {selectedProject !== null && (
         <motion.div
           ref={modalRef}
-          className={`fixed w-full md:w-2/5 lg:w-2/4 h-auto bg-transparent rounded-lg flex flex-col justify-center items-center transition-all duration-300 md:right-12 p-4 ${
+          className={`fixed w-full md:w-2/5 lg:w-2/4 h-auto bg-white rounded-lg flex flex-col justify-center items-center transition-all duration-300 md:right-12 p-4 z-20 ${
             isMobile ? "inset-0 bg-black bg-opacity-50" : ""
           }`}
           variants={fadeUpVariant}
           transition={{ duration: 0.5 }}
-          onMouseEnter={handleModalMouseEnter}
-          onMouseLeave={handleModalMouseLeave}
         >
           <button
             className="fixed top-12 md:top-3 right-3 text-white bg-black rounded-full p-2 hover:text-gray-300 z-50 md:hidden"
