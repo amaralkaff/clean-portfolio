@@ -28,6 +28,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isActive, setIsActive] = useState(false);
+  const [isVideoLoading, setIsVideoLoading] = useState(false);
   const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -48,16 +49,23 @@ const ProjectList: React.FC<ProjectListProps> = ({
     setIsActive(false);
   };
 
-  const handleInteraction = (index: number) => {
+  const handleInteraction = async (index: number) => {
     if (closeTimerRef.current) {
       clearTimeout(closeTimerRef.current);
     }
+
+    setIsVideoLoading(true);
     
-    // If a project is already selected, update it directly
-    if (selectedProject !== null) {
-      setSelectedProject(index);
-    } else {
-      // Initial selection
+    if (selectedProject !== index) {
+      if (videoRef.current) {
+        videoRef.current.pause();
+        videoRef.current.removeAttribute('src');
+        videoRef.current.load();
+      }
+      
+      // Small delay to allow cleanup
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
       setSelectedProject(index);
       setIsActive(true);
       onModalToggle(true);
@@ -156,7 +164,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
                   projects[selectedProject]?.name === "Bang Abah"
                     ? "aspect-w-9 aspect-h-16"
                     : "aspect-w-16 aspect-h-9"
-                } bg-gray-200 rounded-lg`}
+                } bg-gray-100 rounded-lg animate-pulse`}
               />
             }
           >
@@ -170,11 +178,12 @@ const ProjectList: React.FC<ProjectListProps> = ({
               <LocalVideo
                 ref={videoRef}
                 src={projects[selectedProject]?.video}
-                autoplay
+                autoplay={true}
                 controls={false}
                 muted={true}
+                loop={true}
                 className="w-full h-full rounded-lg object-cover"
-                preload="metadata"
+                preload="auto"
               />
             </div>
             <div className="flex flex-wrap justify-center mt-4">

@@ -1,5 +1,15 @@
 // components/LocalVideo.tsx
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+
+const LottieLoader = dynamic(() => import('./CustomLottie'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center w-full h-full bg-gray-100 rounded-lg animate-pulse">
+      <div className="w-10 h-10 border-4 border-gray-200 border-t-gray-800 rounded-full animate-spin" />
+    </div>
+  ),
+});
 
 interface LocalVideoProps {
   src: string;
@@ -16,32 +26,105 @@ interface LocalVideoProps {
 const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
   ({
     src,
-    autoplay = false,
-    loop = false,
+    autoplay = true,
+    loop = true,
     muted = true,
-    controls = true,
+    controls = false,
     className = '',
     poster = '',
-    preload = "metadata",
+    preload = "auto",
     lowResSrc,
   }, ref) => {
+    const [isLoading, setIsLoading] = useState(true);
+    const [hasError, setHasError] = useState(false);
+
+    useEffect(() => {
+      const videoElement = (ref as React.RefObject<HTMLVideoElement>)?.current;
+      if (!videoElement) return;
+
+      setIsLoading(true);
+      setHasError(false);
+
+      const handleLoadedData = () => {
+        setIsLoading(false);
+        if (autoplay) {
+          const playPromise = videoElement.play();
+          if (playPromise !== undefined) {
+            playPromise.catch((error) => {
+              console.log("Playback failed:", error);
+              setHasError(true);
+            });
+          }
+        }
+      };
+
+      const handleError = () => {
+        setIsLoading(false);
+        setHasError(true);
+      };
+
+      videoElement.addEventListener('loadeddata', handleLoadedData);
+      videoElement.addEventListener('error', handleError);
+
+      // Force reload when src changes
+      videoElement.load();
+
+      return () => {
+        videoElement.removeEventListener('loadeddata', handleLoadedData);
+        videoElement.removeEventListener('error', handleError);
+      };
+    }, [ref, src, autoplay]);
 
     return (
-      <video
-        ref={ref}
-        src={lowResSrc || src}
-        autoPlay={autoplay}
-        loop={loop}
-        muted={muted}
-        controls={controls}
-        className={className}
-        poster={poster}
-        preload={preload}
-        playsInline  // Disable fullscreen on iPhone
-        webkit-playsinline  // Additional iPhone support
-      >
-        Your browser does not support the video tag.
-      </video>
+      <div className="relative w-full h-full">
+        {/* Loading State */}
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <LottieLoader />
+          </div>
+        )}
+
+        {/* Error State */}
+        {hasError && !isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
+            <div className="text-center text-gray-500">
+              <svg 
+                className="mx-auto h-12 w-12 text-gray-400"
+                xmlns="http://www.w3.org/2000/svg" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" 
+                />
+              </svg>
+              <p className="mt-2">Failed to load video</p>
+            </div>
+          </div>
+        )}
+
+        {/* Video Element */}
+        <video
+          ref={ref}
+          key={src} // Force remount when src changes
+          src={lowResSrc || src}
+          autoPlay={autoplay}
+          loop={loop}
+          muted={muted}
+          controls={controls}
+          className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+          poster={poster}
+          preload={preload}
+          playsInline
+          webkit-playsinline="true"
+        >
+          Your browser does not support the video tag.
+        </video>
+      </div>
     );
   }
 );
