@@ -18,7 +18,7 @@ const Home = () => {
     // Simple loading timeout for smooth transition
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 2000); // 2 seconds is enough for a polished feel
+    }, 2500); // 2 seconds is enough for a polished feel
 
     return () => clearTimeout(timer);
   }, []);
