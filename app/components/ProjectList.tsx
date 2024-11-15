@@ -30,6 +30,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
   const [isActive, setIsActive] = useState(false);
   const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const updateMedia = () => {
@@ -51,10 +52,25 @@ const ProjectList: React.FC<ProjectListProps> = ({
     if (closeTimerRef.current) {
       clearTimeout(closeTimerRef.current);
     }
-    setSelectedProject(index);
-    setIsActive(true);
-    onModalToggle(true);
+    
+    // If a project is already selected, update it directly
+    if (selectedProject !== null) {
+      setSelectedProject(index);
+    } else {
+      // Initial selection
+      setSelectedProject(index);
+      setIsActive(true);
+      onModalToggle(true);
+    }
   };
+
+  // Effect to handle video playback when project changes
+  useEffect(() => {
+    if (videoRef.current && selectedProject !== null) {
+      videoRef.current.load();
+      videoRef.current.play();
+    }
+  }, [selectedProject]);
 
   useEffect(() => {
     if (!isActive && selectedProject !== null) {
@@ -152,6 +168,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
               } w-full`}
             >
               <LocalVideo
+                ref={videoRef}
                 src={projects[selectedProject]?.video}
                 autoplay
                 controls={false}
