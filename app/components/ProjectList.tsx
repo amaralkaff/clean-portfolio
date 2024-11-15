@@ -37,8 +37,8 @@ const ProjectList: React.FC<ProjectListProps> = ({
 }): ReactElement => {
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
   const modalTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
   const modalRef = useRef<HTMLDivElement>(null);
 
   // Only run this effect on the client-side
@@ -55,7 +55,6 @@ const ProjectList: React.FC<ProjectListProps> = ({
   // Memoize the projects array to prevent unnecessary re-renders
   const projects = useMemo(
     () => [
-      // add project name Workout AI
       {
         name: "Workout AI",
         year: 2024,
@@ -76,7 +75,6 @@ const ProjectList: React.FC<ProjectListProps> = ({
             logo: "/logos/mongodb.png",
             url: "https://mongodb.com",
           },
-          
         ],
       },
       {
@@ -204,12 +202,24 @@ const ProjectList: React.FC<ProjectListProps> = ({
   const closeModal = () => {
     setSelectedProject(null);
     onModalToggle(false);
+    setIsHovering(false);
   };
 
   const handleInteraction = (index: number) => {
-    clearTimeout(modalTimeoutRef.current!);
+    if (modalTimeoutRef.current) {
+      clearTimeout(modalTimeoutRef.current);
+    }
     setSelectedProject(index);
+    setIsHovering(true);
     onModalToggle(true);
+  };
+
+  const startCloseTimer = () => {
+    modalTimeoutRef.current = setTimeout(() => {
+      if (!isHovering) {
+        closeModal();
+      }
+    }, 3000); // 3 second delay before closing
   };
 
   const handleMouseLeave = (e: React.MouseEvent) => {
@@ -219,11 +229,22 @@ const ProjectList: React.FC<ProjectListProps> = ({
       !modalRef.current.contains(e.relatedTarget) &&
       !e.currentTarget.contains(e.relatedTarget)
     ) {
-      e.stopPropagation(); // Stop event propagation
-      modalTimeoutRef.current = setTimeout(() => {
-        closeModal();
-      }, 5000); // 5 seconds delay
+      e.stopPropagation();
+      setIsHovering(false);
+      startCloseTimer();
     }
+  };
+
+  const handleModalMouseEnter = () => {
+    if (modalTimeoutRef.current) {
+      clearTimeout(modalTimeoutRef.current);
+    }
+    setIsHovering(true);
+  };
+
+  const handleModalMouseLeave = () => {
+    setIsHovering(false);
+    startCloseTimer();
   };
 
   return (
@@ -265,7 +286,8 @@ const ProjectList: React.FC<ProjectListProps> = ({
           }`}
           variants={fadeUpVariant}
           transition={{ duration: 0.5 }}
-          onMouseLeave={handleMouseLeave}
+          onMouseEnter={handleModalMouseEnter}
+          onMouseLeave={handleModalMouseLeave}
         >
           <button
             className="fixed top-12 md:top-3 right-3 text-white bg-black rounded-full p-2 hover:text-gray-300 z-50 md:hidden"
