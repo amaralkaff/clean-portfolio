@@ -74,9 +74,9 @@ export interface TechStack {
       ],
     },
     {
-      name: "Bang Abah",
+      name: "Surveyor Pilkada",
       year: 2024,
-      video: "/video/bang-abah-mobile-app.webm",
+      video: "/video/surveyor-pilkada.webm",
       techStack: [
         {
           name: "React Native",

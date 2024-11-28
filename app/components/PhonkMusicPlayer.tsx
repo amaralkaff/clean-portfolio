@@ -8,6 +8,7 @@ const PhonkMusicPlayer: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const tracks = [
+    {path: '/music/X-TALI.mp3', name: 'X-TALI'},
     { path: '/music/Montagem Do Cosmos.mp3', name: 'Montagem Do Cosmos' },
     { path: '/music/AURA.mp3', name: 'AURA' },
     { path: '/music/EEYUH! x Fluxxwave.mp3', name: 'EEYUH! x Fluxxwave' },
