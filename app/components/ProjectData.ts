@@ -15,6 +15,33 @@ export interface TechStack {
   
   export const projects: Project[] = [
     {
+      name: "LSA Course",
+      year: 2025,
+      video: "/video/lsa-course.webm",
+      techStack: [
+        {
+          name: "NextJS",
+          logo: "/logos/nextjs.png",
+          url: "https://nextjs.org",
+        },
+        {
+          name: "MongoDB",
+          logo: "/logos/mongodb.png",
+          url: "https://mongodb.com",
+        },
+        {
+          name: "Mixtral",
+          logo: "/logos/mixtral.png",
+          url: "https://mixtral.ai",
+        },
+        {
+          name: "ThreeJS",
+          logo: "/logos/threejs.png",
+          url: "https://threejs.org",
+        },
+      ],
+    },
+    {
       name: "Workout AI",
       year: 2024,
       video: "/video/workout-ai.webm",

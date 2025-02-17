@@ -4,6 +4,7 @@ import React, {
   Suspense,
   useRef,
   ReactElement,
+  useCallback,
 } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
@@ -43,11 +44,11 @@ const ProjectList: React.FC<ProjectListProps> = ({
     return () => window.removeEventListener("resize", updateMedia);
   }, []);
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setSelectedProject(null);
     onModalToggle(false);
     setIsActive(false);
-  };
+  }, [onModalToggle]);
 
   const handleInteraction = async (index: number) => {
     if (closeTimerRef.current) {
@@ -89,7 +90,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
         clearTimeout(closeTimerRef.current);
       }
     };
-  }, [isActive]);
+  }, [isActive, closeModal, selectedProject]);
 
   return (
     <div
@@ -98,7 +99,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
     >
       <CircuitAnimation 
         isActive={selectedProject !== null} 
-        targetRef={modalRef} 
+        targetRef={modalRef as React.RefObject<HTMLElement>} 
       />
       
       <div

@@ -50,7 +50,7 @@ class Particle {
   const CircuitAnimation = ({ isActive, targetRef }: { isActive: boolean; targetRef: React.RefObject<HTMLElement> }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const particles = useRef<Particle[]>([]);
-    const animationRef = useRef<number>();
+    const animationRef = useRef<number | null>(null);
     const ctx = useRef<CanvasRenderingContext2D | null>(null);
   
     const clearCanvas = useCallback(() => {
@@ -136,7 +136,7 @@ class Particle {
           )
         );
       });
-    }, []);
+    }, [targetRef]);
   
     useEffect(() => {
       if (!isActive || !ctx.current) return;

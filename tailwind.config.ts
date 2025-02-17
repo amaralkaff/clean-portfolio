@@ -17,12 +17,12 @@ const config: Config = {
           '50%': { backgroundPosition: '100% 50%' },
         },
       },
-    },
-  },
-  variants: {
-    extend: {
-      backgroundColor: ['active'],
-      textColor: ['active'],
+      backgroundColor: {
+        active: 'active',
+      },
+      textColor: {
+        active: 'active',
+      },
     },
   },
   plugins: [],
