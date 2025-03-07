@@ -6,6 +6,8 @@ const PhonkMusicPlayer: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const [currentTrack, setCurrentTrack] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const tracks = [
     {path: '/music/X-TALI.mp3', name: 'X-TALI'},
@@ -19,23 +21,37 @@ const PhonkMusicPlayer: React.FC = () => {
   useEffect(() => {
     const audio = audioRef.current;
     if (audio) {
+      setIsLoading(true);
+      setError(null);
       audio.src = tracks[currentTrack].path;
-      if (isPlaying) {
-        audio.play().catch(error => console.error("Error playing audio:", error));
-      }
-    }
-  }, [currentTrack]);
+      
+      const handleCanPlayThrough = () => {
+        setIsLoading(false);
+      };
 
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (audio) {
+      const handleError = (e: ErrorEvent) => {
+        setIsLoading(false);
+        setError(`Failed to load audio: ${e.message}`);
+        console.error("Error loading audio:", e);
+      };
+
+      audio.addEventListener('canplaythrough', handleCanPlayThrough);
+      audio.addEventListener('error', handleError);
+
       if (isPlaying) {
-        audio.play().catch(error => console.error("Error playing audio:", error));
-      } else {
-        audio.pause();
+        audio.play().catch(error => {
+          setError(`Failed to play audio: ${error.message}`);
+          console.error("Error playing audio:", error);
+          setIsPlaying(false);
+        });
       }
+
+      return () => {
+        audio.removeEventListener('canplaythrough', handleCanPlayThrough);
+        audio.removeEventListener('error', handleError);
+      };
     }
-  }, [isPlaying]);
+  }, [currentTrack, isPlaying]);
 
   useEffect(() => {
     const audio = audioRef.current;

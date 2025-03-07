@@ -8,7 +8,11 @@ const loadImages = async (imageUrls: string[]): Promise<boolean> => {
       const img = new Image();
       img.src = url;
       img.onload = () => resolve();
-      img.onerror = () => reject();
+      img.onerror = () => {
+        console.error(`Failed to load image: ${url}`);
+        // Resolve instead of reject to continue loading other images
+        resolve();
+      };
     });
   };
 
@@ -23,6 +27,7 @@ const loadImages = async (imageUrls: string[]): Promise<boolean> => {
 
 const AssetLoader: React.FC<{ onLoadComplete: () => void }> = ({ onLoadComplete }) => {
   const [progress, setProgress] = useState(0);
+  const [failedImages, setFailedImages] = useState<string[]>([]);
 
   useEffect(() => {
     const logoUrls = [
@@ -42,6 +47,8 @@ const AssetLoader: React.FC<{ onLoadComplete: () => void }> = ({ onLoadComplete 
     ];
 
     let mounted = true;
+    let retryCount = 0;
+    const maxRetries = 3;
 
     const load = async () => {
       // Start loading animation
@@ -53,8 +60,38 @@ const AssetLoader: React.FC<{ onLoadComplete: () => void }> = ({ onLoadComplete 
         }
       }, 100);
 
-      // Load all images
-      await loadImages(logoUrls);
+      // Load all images with retry logic
+      const loadWithRetry = async () => {
+        const failed: string[] = [];
+        
+        for (const url of logoUrls) {
+          try {
+            await new Promise((resolve, reject) => {
+              const img = new Image();
+              img.onload = resolve;
+              img.onerror = () => {
+                failed.push(url);
+                resolve(); // Resolve to continue with other images
+              };
+              img.src = url;
+            });
+          } catch {
+            failed.push(url);
+          }
+        }
+
+        if (failed.length > 0 && retryCount < maxRetries) {
+          retryCount++;
+          console.log(`Retrying failed images (attempt ${retryCount}/${maxRetries})`);
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
+          return loadWithRetry();
+        }
+
+        return failed;
+      };
+
+      const failedUrls = await loadWithRetry();
+      setFailedImages(failedUrls);
 
       // Complete loading
       clearInterval(progressInterval);

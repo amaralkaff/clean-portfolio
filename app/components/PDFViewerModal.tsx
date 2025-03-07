@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface PDFViewerModalProps {
@@ -8,74 +8,63 @@ interface PDFViewerModalProps {
 }
 
 const PDFViewerModal: React.FC<PDFViewerModalProps> = ({ isOpen, onClose, pdfUrl }) => {
-  if (!isOpen) return null;
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleIframeLoad = () => {
+    setIsLoading(false);
+  };
+
+  const handleIframeError = () => {
+    setIsLoading(false);
+    setError('Failed to load PDF');
+  };
 
   return (
     <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 bg-black md:bg-black/50 md:p-4"
-      >
-        {/* Mobile header bar */}
-        <div className="flex items-center justify-between bg-[#262626] p-4 md:hidden">
-          <button
-            onClick={onClose}
-            className="text-white p-1"
-            aria-label="Close"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
-          </button>
-          <div className="text-white font-medium">Resume</div>
-          <div className="w-6" /> {/* Spacer for alignment */}
-        </div>
-
-        {/* Desktop close button */}
-        <button
-          onClick={onClose}
-          className="hidden md:block absolute top-6 right-6 p-2 hover:bg-gray-100 rounded-full transition-colors bg-white"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 text-gray-600"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
-
-        {/* Content wrapper */}
+      {isOpen && (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 20 }}
-          onClick={(e) => e.stopPropagation()}
-          className="h-[calc(100%-6rem)] md:h-[80vh] w-full md:max-w-4xl mx-auto mt-0 md:mt-8 bg-white md:rounded-lg overflow-hidden shadow-xl"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={onClose}
         >
-          <iframe
-            src={`${pdfUrl}#view=FitH`}
-            className="w-full h-full"
-            title="Resume PDF"
-          />
+          <motion.div
+            initial={{ scale: 0.95 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0.95 }}
+            className="bg-white p-4 rounded-lg w-11/12 h-5/6 relative"
+            onClick={e => e.stopPropagation()}
+          >
+            <button
+              onClick={onClose}
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+            
+            {isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+              </div>
+            )}
+
+            {error && (
+              <div className="absolute inset-0 flex items-center justify-center text-red-500">
+                {error}
+              </div>
+            )}
+
+            <iframe
+              src={pdfUrl}
+              className="w-full h-full"
+              onLoad={handleIframeLoad}
+              onError={handleIframeError}
+            />
+          </motion.div>
         </motion.div>
-      </motion.div>
+      )}
     </AnimatePresence>
   );
 };
