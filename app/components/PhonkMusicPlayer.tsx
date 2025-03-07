@@ -8,6 +8,7 @@ const PhonkMusicPlayer: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const nextAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const tracks = [
     {path: '/music/X-TALI.mp3', name: 'X-TALI'},
@@ -18,72 +19,119 @@ const PhonkMusicPlayer: React.FC = () => {
     { path: '/music/LDRR.mp3', name: 'LDRR' },
   ];
 
+  // Preload next track
+  useEffect(() => {
+    const nextTrackIndex = (currentTrack + 1) % tracks.length;
+    if (nextAudioRef.current) {
+      nextAudioRef.current.src = tracks[nextTrackIndex].path;
+      nextAudioRef.current.load();
+    }
+  }, [currentTrack]);
+
   useEffect(() => {
     const audio = audioRef.current;
-    if (audio) {
-      setIsLoading(true);
-      setError(null);
-      audio.src = tracks[currentTrack].path;
-      
-      const handleCanPlayThrough = () => {
-        setIsLoading(false);
-      };
+    if (!audio) return;
 
-      const handleError = (e: ErrorEvent) => {
-        setIsLoading(false);
-        setError(`Failed to load audio: ${e.message}`);
-        console.error("Error loading audio:", e);
-      };
-
-      audio.addEventListener('canplaythrough', handleCanPlayThrough);
-      audio.addEventListener('error', handleError);
-
-      if (isPlaying) {
-        audio.play().catch(error => {
-          setError(`Failed to play audio: ${error.message}`);
-          console.error("Error playing audio:", error);
-          setIsPlaying(false);
+    const loadAudio = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        // Create a new Audio element and attempt to load it
+        const tempAudio = new Audio();
+        tempAudio.src = tracks[currentTrack].path;
+        
+        await new Promise((resolve, reject) => {
+          tempAudio.oncanplaythrough = resolve;
+          tempAudio.onerror = reject;
+          tempAudio.load();
         });
-      }
 
-      return () => {
-        audio.removeEventListener('canplaythrough', handleCanPlayThrough);
-        audio.removeEventListener('error', handleError);
-      };
-    }
+        // If successful, update the actual audio element
+        audio.src = tracks[currentTrack].path;
+        setIsLoading(false);
+
+        if (isPlaying) {
+          try {
+            await audio.play();
+          } catch (playError) {
+            console.error('Play error:', playError);
+            setIsPlaying(false);
+          }
+        }
+      } catch (error) {
+        console.error('Audio loading error:', error);
+        setError('Failed to load audio');
+        setIsLoading(false);
+        setIsPlaying(false);
+      }
+    };
+
+    loadAudio();
+
+    const handleEnded = () => {
+      nextTrack();
+    };
+
+    audio.addEventListener('ended', handleEnded);
+
+    return () => {
+      audio.removeEventListener('ended', handleEnded);
+    };
   }, [currentTrack, isPlaying]);
 
   useEffect(() => {
     const audio = audioRef.current;
-    if (audio) {
-      const updateProgress = () => {
-        const value = (audio.currentTime / audio.duration) * 100;
-        setProgress(value);
-      };
-      audio.addEventListener('timeupdate', updateProgress);
-      return () => audio.removeEventListener('timeupdate', updateProgress);
-    }
+    if (!audio) return;
+
+    const updateProgress = () => {
+      if (!audio.duration) return;
+      const value = (audio.currentTime / audio.duration) * 100;
+      setProgress(value || 0);
+    };
+
+    audio.addEventListener('timeupdate', updateProgress);
+    return () => audio.removeEventListener('timeupdate', updateProgress);
   }, []);
 
-  const togglePlay = () => setIsPlaying(!isPlaying);
+  const togglePlay = async () => {
+    const audio = audioRef.current;
+    if (!audio || isLoading) return;
+
+    try {
+      if (isPlaying) {
+        audio.pause();
+      } else {
+        await audio.play();
+      }
+      setIsPlaying(!isPlaying);
+    } catch (error) {
+      console.error('Playback error:', error);
+      setError('Failed to play audio');
+      setIsPlaying(false);
+    }
+  };
+
   const nextTrack = () => {
     setCurrentTrack((prev) => (prev + 1) % tracks.length);
   };
 
   return (
-    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray bg-opacity-80 backdrop-blur-sm text-black px-4 rounded-full flex items-center space-x-4 z-50 transition-all duration-300 hover:bg-opacity-100">
-      <audio ref={audioRef}>
-        <source src={tracks[currentTrack].path} type="audio/mpeg" />
-      </audio>
+    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray bg-opacity-80 backdrop-blur-sm text-black px-4 py-2 rounded-full flex items-center space-x-4 z-50 transition-all duration-300 hover:bg-opacity-100">
+      <audio ref={audioRef} preload="auto" />
+      <audio ref={nextAudioRef} preload="auto" style={{ display: 'none' }} />
+      
       <button 
-        onClick={togglePlay} 
-        className="focus:outline-none transition-transform duration-200 ease-in-out transform hover:scale-110"
+        onClick={togglePlay}
+        disabled={isLoading} 
+        className={`focus:outline-none transition-transform duration-200 ease-in-out transform hover:scale-110 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         {isPlaying ? <Pause size={18} /> : <Play size={18} />}
       </button>
-      <div className="flex flex-col w-48 items-center"> {/* Added items-center here */}
-        <div className="text-xs font-medium truncate text-center w-full"> {/* Added text-center and w-full here */}
-          {tracks[currentTrack].name}
+
+      <div className="flex flex-col w-48 items-center">
+        <div className="text-xs font-medium truncate text-center w-full">
+          {isLoading ? 'Loading...' : error || tracks[currentTrack].name}
         </div>
         <div className="w-full h-1 bg-gray-200 rounded-full mt-1 overflow-hidden">
           <div 
@@ -92,9 +140,11 @@ const PhonkMusicPlayer: React.FC = () => {
           />
         </div>
       </div>
+
       <button 
-        onClick={nextTrack} 
-        className="focus:outline-none transition-transform duration-200 ease-in-out transform hover:scale-110"
+        onClick={nextTrack}
+        disabled={isLoading} 
+        className={`focus:outline-none transition-transform duration-200 ease-in-out transform hover:scale-110 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         <SkipForward size={18} />
       </button>
