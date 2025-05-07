@@ -2,27 +2,48 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
-const loadImages = async (imageUrls: string[]): Promise<boolean> => {
+const loadImages = async (imageUrls: string[]): Promise<string[]> => {
   const loadImage = (url: string): Promise<void> => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const img = new Image();
-      img.src = url;
-      img.onload = () => resolve();
-      img.onerror = () => reject();
+      
+      const handleLoad = () => {
+        img.removeEventListener('load', handleLoad);
+        img.removeEventListener('error', handleError);
+        resolve();
+      };
+
+      const handleError = () => {
+        console.error(`Failed to load image: ${url}`);
+        img.removeEventListener('load', handleLoad);
+        img.removeEventListener('error', handleError);
+        resolve(); // Resolve instead of reject to continue loading other images
+      };
+
+      img.addEventListener('load', handleLoad);
+      img.addEventListener('error', handleError);
+      
+      // Add cache busting parameter to prevent caching issues
+      img.src = `${url}?t=${Date.now()}`;
     });
   };
 
-  try {
-    await Promise.all(imageUrls.map(url => loadImage(url)));
-    return true;
-  } catch (error) {
-    console.error('Error loading images:', error);
-    return false;
+  const failedUrls: string[] = [];
+  for (const url of imageUrls) {
+    try {
+      await loadImage(url);
+    } catch {
+      failedUrls.push(url);
+    }
   }
+  return failedUrls;
 };
 
 const AssetLoader: React.FC<{ onLoadComplete: () => void }> = ({ onLoadComplete }) => {
   const [progress, setProgress] = useState(0);
+  const [failedImages, setFailedImages] = useState<string[]>([]);
+  const [retryCount, setRetryCount] = useState(0);
+  const maxRetries = 3;
 
   useEffect(() => {
     const logoUrls = [
@@ -53,16 +74,30 @@ const AssetLoader: React.FC<{ onLoadComplete: () => void }> = ({ onLoadComplete 
         }
       }, 100);
 
-      // Load all images
-      await loadImages(logoUrls);
-
-      // Complete loading
-      clearInterval(progressInterval);
-      if (mounted) {
-        setProgress(100);
-        setTimeout(() => {
-          onLoadComplete();
-        }, 500);
+      try {
+        const failedUrls = await loadImages(logoUrls);
+        
+        if (mounted) {
+          setFailedImages(failedUrls);
+          
+          if (failedUrls.length > 0 && retryCount < maxRetries) {
+            console.log(`Retrying failed images (attempt ${retryCount + 1}/${maxRetries})`);
+            setRetryCount(prev => prev + 1);
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
+            await load(); // Retry loading
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Error during image loading:', error);
+      } finally {
+        if (mounted) {
+          clearInterval(progressInterval);
+          setProgress(100);
+          setTimeout(() => {
+            onLoadComplete();
+          }, 500);
+        }
       }
     };
 
@@ -71,7 +106,7 @@ const AssetLoader: React.FC<{ onLoadComplete: () => void }> = ({ onLoadComplete 
     return () => {
       mounted = false;
     };
-  }, [onLoadComplete]);
+  }, [onLoadComplete, retryCount]);
 
   return (
     <motion.div
@@ -88,7 +123,14 @@ const AssetLoader: React.FC<{ onLoadComplete: () => void }> = ({ onLoadComplete 
           transition={{ duration: 0.3 }}
         />
       </div>
-      <span className="mt-4 text-gray-600">Loading assets... {progress}%</span>
+      <span className="mt-4 text-gray-600">
+        Loading assets... {progress}%
+        {failedImages.length > 0 && retryCount < maxRetries && (
+          <span className="block text-sm text-gray-400">
+            Retrying failed images... ({retryCount + 1}/{maxRetries})
+          </span>
+        )}
+      </span>
     </motion.div>
   );
 };
