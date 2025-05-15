@@ -1,5 +1,8 @@
 "use client";
-import React, { useState, useEffect, Suspense } from "react";
+import React, { Suspense, useEffect } from "react";
+import { useAppViewModel } from "./viewModels/AppViewModel";
+
+// Use next/dynamic instead of the import from 'next/dynamic'
 import dynamic from "next/dynamic";
 
 const LottieLoader = dynamic(() => import("./components/CustomLottie"), { 
@@ -11,16 +14,25 @@ const Footer = dynamic(() => import("./components/Footer"));
 const PhonkMusicPlayer = dynamic(() => import("./components/PhonkMusicPlayer"));
 
 const Home = () => {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [state, actions] = useAppViewModel();
+  const { modalVisible, isLoading } = state;
+  const { setModalVisible } = actions;
 
+  // This effect helps enable auto-play by adding a page-level click handler
   useEffect(() => {
-    // Simple loading timeout for smooth transition
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2500); // 2 seconds is enough for a polished feel
-
-    return () => clearTimeout(timer);
+    // Add a one-time click handler to the entire document
+    // This helps with browser auto-play policies
+    const enableAudio = () => {
+      // This click will trigger the audio to play
+      // through the event listeners in PhonkMusicViewModel
+      document.removeEventListener('click', enableAudio);
+    };
+    
+    document.addEventListener('click', enableAudio, { once: true });
+    
+    return () => {
+      document.removeEventListener('click', enableAudio);
+    };
   }, []);
 
   if (isLoading) {
@@ -50,7 +62,7 @@ const Home = () => {
       </Suspense>
       
       <Footer />
-      <PhonkMusicPlayer />
+      <PhonkMusicPlayer autoPlay={true} />
     </div>
   );
 };

@@ -1,7 +1,10 @@
-import React, { useState } from "react";
+'use client';
+
+import React from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import PDFViewerModal from "./PDFViewerModal";
+import { useMainContentViewModel } from "../viewModels/MainContentViewModel";
 
 interface MainContentProps {
   isVisible: boolean;
@@ -13,12 +16,9 @@ const fadeUpVariant = {
 };
 
 const MainContent: React.FC<MainContentProps> = ({ isVisible }) => {
-  const [isPDFModalOpen, setIsPDFModalOpen] = useState(false);
-
-  const handleResumeClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsPDFModalOpen(true);
-  };
+  const [state, actions] = useMainContentViewModel();
+  const { isPDFModalOpen, personalInfo } = state;
+  const { handleResumeClick, setIsPDFModalOpen } = actions;
 
   return (
     <>
@@ -31,26 +31,32 @@ const MainContent: React.FC<MainContentProps> = ({ isVisible }) => {
       >
         <div className="text-center">
           <div className="text-lg font-bold">
-            <span className="text-black">Abu Ammar</span>
+            <span className="text-black">{personalInfo.name}</span>
             <br />
-            <span className="text-gray-600">Human side of zero and one</span>
+            <span className="text-gray-600">{personalInfo.tagline}</span>
           </div>
           <div className="mt-2 space-x-4 text-gray-600">
-            <button
-              onClick={handleResumeClick}
-              className="hover:underline cursor-pointer"
-            >
-              Resume
-            </button>
-            <Link href="mailto:amaralkaff@gmail.com" className="hover:underline">
-              Email
-            </Link>
-            <Link href="https://www.linkedin.com/in/amaralkaff/" className="hover:underline" rel="noopener noreferrer">
-              LinkedIn
-            </Link>
-            <Link href="https://github.com/amaralkaff" className="hover:underline" rel="noopener noreferrer">
-              GitHub
-            </Link>
+            {personalInfo.contactLinks.map((link, index) => (
+              link.type === 'resume' ? (
+                <button
+                  key={index}
+                  onClick={handleResumeClick}
+                  className="hover:underline cursor-pointer"
+                >
+                  {link.label}
+                </button>
+              ) : (
+                <Link 
+                  key={index}
+                  href={link.url} 
+                  className="hover:underline" 
+                  rel="noopener noreferrer"
+                  target={link.type !== 'email' ? '_blank' : undefined}
+                >
+                  {link.label}
+                </Link>
+              )
+            ))}
           </div>
         </div>
       </motion.div>

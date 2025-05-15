@@ -1,16 +1,17 @@
+'use client';
+
 import React, {
-  useState,
-  useEffect,
   Suspense,
   useRef,
   ReactElement,
-  useCallback,
+  forwardRef,
 } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import CircuitAnimation from "./CircuitAnimation";
-import { projects } from "./ProjectData";
+import { useProjectListViewModel } from "../viewModels/ProjectListViewModel";
+import { Project } from "../models/ProjectData";
 
 const LocalVideo = React.lazy(() => import("./LocalVideo"));
 
@@ -26,71 +27,12 @@ const fadeUpVariant = {
 const ProjectList: React.FC<ProjectListProps> = ({
   onModalToggle,
 }): ReactElement => {
-  const [selectedProject, setSelectedProject] = useState<number | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isActive, setIsActive] = useState(false);
-  const [isVideoLoading, setIsVideoLoading] = useState(false);
-  const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const updateMedia = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    updateMedia();
-    window.addEventListener("resize", updateMedia);
-    return () => window.removeEventListener("resize", updateMedia);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setSelectedProject(null);
-    onModalToggle(false);
-    setIsActive(false);
-  }, [onModalToggle]);
-
-  const handleInteraction = async (index: number) => {
-    if (closeTimerRef.current) {
-      clearTimeout(closeTimerRef.current);
-    }
-
-    setIsVideoLoading(true);
-    
-    if (selectedProject !== index) {
-      if (videoRef.current) {
-        videoRef.current.pause();
-        videoRef.current.removeAttribute('src');
-        videoRef.current.load();
-      }
-      
-      // Small delay to allow cleanup
-      await new Promise(resolve => setTimeout(resolve, 50));
-      
-      setSelectedProject(index);
-      setIsActive(true);
-      onModalToggle(true);
-    }
-  };
-
-  // Effect to handle video playback when project changes
-  useEffect(() => {
-    if (videoRef.current && selectedProject !== null) {
-      videoRef.current.load();
-      videoRef.current.play();
-    }
-  }, [selectedProject]);
-
-  useEffect(() => {
-    if (!isActive && selectedProject !== null) {
-      closeTimerRef.current = setTimeout(closeModal, 200);
-    }
-    return () => {
-      if (closeTimerRef.current) {
-        clearTimeout(closeTimerRef.current);
-      }
-    };
-  }, [isActive, closeModal, selectedProject]);
+  
+  const [state, actions] = useProjectListViewModel(onModalToggle);
+  const { selectedProject, isMobile, isActive, projects } = state;
+  const { handleInteraction, closeModal, setIsActive } = actions;
 
   return (
     <div
@@ -190,12 +132,13 @@ const ProjectList: React.FC<ProjectListProps> = ({
             <div className="flex flex-wrap justify-center mt-4">
               {projects[selectedProject]?.techStack.map((tech, index) => (
                 <div key={index} className="flex items-center m-2">
-                  <Link href={tech.url} passHref>
+                  <Link href={tech.url} passHref target="_blank" rel="noopener noreferrer">
                     <Image
                       src={tech.logo}
                       alt={tech.name}
                       width={30}
                       height={30}
+                      style={{ width: 'auto', height: 'auto' }}
                       className="mr-2 hover:opacity-80"
                     />
                   </Link>
