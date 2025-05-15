@@ -12,10 +12,10 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
   autoPlay = true 
 }) => {
   const [state, actions] = usePhonkMusicViewModel(autoPlay);
-  const { isPlaying, progress, currentTrack, isLoading, error, tracks } = state;
-  const { togglePlay, nextTrack, audioRef, nextAudioRef } = actions;
+  const { isPlaying, progress, currentTrack, isLoading, error, tracks, isMuted } = state;
+  const { togglePlay, nextTrack, toggleMute, audioRef, nextAudioRef } = actions;
 
-  // Let the ViewModel handle audio configuration
+  // Set initial audio properties
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.preload = 'auto';
@@ -64,6 +64,7 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
       <div className="flex flex-col w-48 items-center">
         <div className="text-xs font-medium truncate text-center w-full">
           {isLoading ? 'Loading...' : error || tracks[currentTrack].name}
+          {isMuted && isPlaying && <span className="ml-1 text-yellow-400">(Muted)</span>}
         </div>
         <div className="w-full h-1 bg-gray-600 rounded-full mt-1 overflow-hidden">
           <div 
@@ -84,13 +85,13 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
       </button>
 
       <button 
-        onClick={togglePlay}
+        onClick={toggleMute}
         disabled={isLoading} 
         className={`focus:outline-none transition-transform duration-200 ease-in-out transform hover:scale-110 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-        aria-label={isPlaying ? "Stop music" : "Start music"}
-        title={isPlaying ? "Stop music" : "Start music"}
+        aria-label={isMuted ? "Unmute music" : "Mute music"}
+        title={isMuted ? "Unmute music" : "Mute music"}
       >
-        {isPlaying ? 
+        {isMuted ? 
           <VolumeX size={20} className="text-red-500" /> : 
           <Volume2 size={20} className="text-green-500" />
         }
