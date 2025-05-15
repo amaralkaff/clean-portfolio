@@ -17,6 +17,7 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
   const initCompleteRef = useRef(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [visualizerBars, setVisualizerBars] = useState([0.3, 0.8, 0.5]);
+  const [pulseAnimation, setPulseAnimation] = useState(false);
 
   // Set up audio element only once when the component mounts
   useEffect(() => {
@@ -60,8 +61,23 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
     return () => clearInterval(interval);
   }, [isPlaying]);
 
+  // Pulse animation for minimized state
+  useEffect(() => {
+    if (isExpanded) return;
+    
+    const pulseInterval = setInterval(() => {
+      setPulseAnimation(prev => !prev);
+    }, 2000);
+    
+    return () => clearInterval(pulseInterval);
+  }, [isExpanded]);
+
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded);
+    // Start playing music when expanded if currently paused
+    if (!isExpanded && !isPlaying && !isLoading) {
+      togglePlay();
+    }
   };
 
   return (
@@ -118,7 +134,7 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
         // Collapsed player
         <div 
           onClick={toggleExpanded} 
-          className="bg-gray bg-opacity-80 backdrop-blur-sm rounded-lg w-full h-full flex items-center justify-center cursor-pointer hover:bg-opacity-100 transition-colors relative overflow-hidden shadow-lg"
+          className={`bg-gray bg-opacity-80 backdrop-blur-sm rounded-lg w-full h-full flex items-center justify-center cursor-pointer hover:bg-opacity-100 transition-all duration-500 relative overflow-hidden shadow-lg hover:shadow-xl ${pulseAnimation ? 'scale-105' : 'scale-100'}`}
         >
           <div className="absolute top-0 left-0 right-0 h-1 bg-gray-200 overflow-hidden">
             <div 
@@ -127,20 +143,29 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
             />
           </div>
           
-          <div className="flex items-center justify-center h-6 space-x-0.5">
-            <div 
-              className="w-1 bg-black rounded-sm transition-all duration-300"
-              style={{ height: isPlaying ? `${visualizerBars[0] * 24}px` : '16px' }}
-            ></div>
-            <div 
-              className="w-1 bg-black rounded-sm transition-all duration-300"
-              style={{ height: isPlaying ? `${visualizerBars[1] * 24}px` : '10px' }}
-            ></div>
-            <div 
-              className="w-1 bg-black rounded-sm transition-all duration-300"
-              style={{ height: isPlaying ? `${visualizerBars[2] * 24}px` : '5px' }}
-            ></div>
+          <div className="flex flex-col items-center justify-center">
+            <div className="flex items-center justify-center h-6 space-x-0.5 mb-1">
+              <div 
+                className="w-1 bg-black rounded-sm transition-all duration-300"
+                style={{ height: isPlaying ? `${visualizerBars[0] * 24}px` : '16px' }}
+              ></div>
+              <div 
+                className="w-1 bg-black rounded-sm transition-all duration-300"
+                style={{ height: isPlaying ? `${visualizerBars[1] * 24}px` : '10px' }}
+              ></div>
+              <div 
+                className="w-1 bg-black rounded-sm transition-all duration-300"
+                style={{ height: isPlaying ? `${visualizerBars[2] * 24}px` : '5px' }}
+              ></div>
+            </div>
+            
+            <div className={`text-[8px] font-bold text-black ${isPlaying ? 'opacity-100' : 'opacity-70'}`}>
+              {isPlaying ? "NOW PLAYING" : "CLICK TO PLAY"}
+            </div>
           </div>
+          
+          {/* Subtle glow effect */}
+          <div className={`absolute inset-0 bg-black opacity-0 hover:opacity-10 transition-opacity duration-300 rounded-lg ${pulseAnimation && !isPlaying ? 'ring-2 ring-black ring-opacity-30' : ''}`}></div>
         </div>
       )}
     </div>
