@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { Play, Pause, SkipForward, Volume2, VolumeX } from 'lucide-react';
+import { Play, Pause, SkipForward } from 'lucide-react';
 import { usePhonkMusicViewModel } from '../viewModels/PhonkMusicViewModel';
 
 interface PhonkMusicPlayerProps {
@@ -12,63 +12,40 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
   autoPlay = true 
 }) => {
   const [state, actions] = usePhonkMusicViewModel(autoPlay);
-  const { isPlaying, progress, currentTrack, isLoading, error, tracks, isMuted } = state;
-  const { togglePlay, nextTrack, toggleMute, audioRef, nextAudioRef } = actions;
+  const { isPlaying, progress, currentTrack, isLoading, error, tracks } = state;
+  const { togglePlay, nextTrack, audioRef, nextAudioRef } = actions;
 
-  // Set initial audio properties
+  // Use effect to set audio element properties
   useEffect(() => {
     if (audioRef.current) {
+      // Setting muted initially helps with auto-play policies
+      audioRef.current.muted = false;
+      audioRef.current.volume = 0.5;
       audioRef.current.preload = 'auto';
-      audioRef.current.volume = 0.7;
     }
   }, []);
 
-  // Auto-stop music after 5 minutes if user hasn't interacted with player
-  useEffect(() => {
-    if (isPlaying) {
-      const autoStopTimer = setTimeout(() => {
-        if (audioRef.current) {
-          audioRef.current.pause();
-          togglePlay();
-        }
-      }, 5 * 60 * 1000); // 5 minutes
-      
-      return () => clearTimeout(autoStopTimer);
-    }
-  }, [isPlaying, togglePlay]);
-
   return (
-    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray-800 bg-opacity-90 backdrop-blur-sm text-white px-4 py-3 rounded-full flex items-center space-x-4 z-50 transition-all duration-300 hover:bg-opacity-100 shadow-lg">
-      {/* Simple audio elements - let the ViewModel handle the complexity */}
-      <audio 
-        ref={audioRef} 
-        preload="auto" 
-        playsInline 
-      />
-      <audio 
-        ref={nextAudioRef} 
-        preload="auto" 
-        style={{ display: 'none' }} 
-      />
+    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray bg-opacity-80 backdrop-blur-sm text-black px-4 py-2 rounded-full flex items-center space-x-4 z-50 transition-all duration-300 hover:bg-opacity-100">
+      {/* The loop attribute helps with continuous playback */}
+      <audio ref={audioRef} preload="auto" muted={false} loop={false} />
+      <audio ref={nextAudioRef} preload="auto" style={{ display: 'none' }} />
       
       <button 
         onClick={togglePlay}
         disabled={isLoading} 
         className={`focus:outline-none transition-transform duration-200 ease-in-out transform hover:scale-110 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-        aria-label={isPlaying ? "Pause music" : "Play music"}
-        title={isPlaying ? "Pause music" : "Play music"}
       >
-        {isPlaying ? <Pause size={20} className="text-red-400" /> : <Play size={20} className="text-green-400" />}
+        {isPlaying ? <Pause size={18} /> : <Play size={18} />}
       </button>
 
       <div className="flex flex-col w-48 items-center">
         <div className="text-xs font-medium truncate text-center w-full">
           {isLoading ? 'Loading...' : error || tracks[currentTrack].name}
-          {isMuted && isPlaying && <span className="ml-1 text-yellow-400">(Muted)</span>}
         </div>
-        <div className="w-full h-1 bg-gray-600 rounded-full mt-1 overflow-hidden">
+        <div className="w-full h-1 bg-gray-200 rounded-full mt-1 overflow-hidden">
           <div 
-            className="h-full bg-white rounded-full transition-all duration-300 ease-out"
+            className="h-full bg-black rounded-full transition-all duration-300 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -78,23 +55,8 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
         onClick={nextTrack}
         disabled={isLoading} 
         className={`focus:outline-none transition-transform duration-200 ease-in-out transform hover:scale-110 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-        aria-label="Next track"
-        title="Next track"
       >
-        <SkipForward size={20} className="text-blue-300" />
-      </button>
-
-      <button 
-        onClick={toggleMute}
-        disabled={isLoading} 
-        className={`focus:outline-none transition-transform duration-200 ease-in-out transform hover:scale-110 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-        aria-label={isMuted ? "Unmute music" : "Mute music"}
-        title={isMuted ? "Unmute music" : "Mute music"}
-      >
-        {isMuted ? 
-          <VolumeX size={20} className="text-red-500" /> : 
-          <Volume2 size={20} className="text-green-500" />
-        }
+        <SkipForward size={18} />
       </button>
     </div>
   );

@@ -14,13 +14,11 @@ export interface PhonkMusicState {
   isLoading: boolean;
   error: string | null;
   tracks: MusicTrack[];
-  isMuted: boolean;
 }
 
 export interface PhonkMusicActions {
   togglePlay: () => Promise<void>;
   nextTrack: () => void;
-  toggleMute: () => void;
   audioRef: React.RefObject<HTMLAudioElement | null>;
   nextAudioRef: React.RefObject<HTMLAudioElement | null>;
 }
@@ -32,14 +30,12 @@ export function usePhonkMusicViewModel(autoPlay: boolean = true): [PhonkMusicSta
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hasInteracted, setHasInteracted] = useState(false);
-  const [lastInteractionTime, setLastInteractionTime] = useState(Date.now());
-  const [isLoadingTrack, setIsLoadingTrack] = useState(false);
-  const [isMuted, setIsMuted] = useState(true); // Start muted to allow autoplay
+  const [mutedAutoPlayStarted, setMutedAutoPlayStarted] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const nextAudioRef = useRef<HTMLAudioElement | null>(null);
-  const playRequestTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
+  const silentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const autoPlayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const tracks: MusicTrack[] = [
     { path: '/music/FUNK MI CAMINO.mp3', name: 'FUNK MI CAMINO' },
@@ -51,101 +47,58 @@ export function usePhonkMusicViewModel(autoPlay: boolean = true): [PhonkMusicSta
     { path: '/music/LDRR.mp3', name: 'LDRR' },
   ];
 
-  // Initialize AudioContext on user interaction
-  const initAudioContext = () => {
-    if (!audioContextRef.current) {
-      try {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-        
-        // If context is suspended (browser requires user gesture)
-        if (audioContextRef.current.state === 'suspended') {
-          audioContextRef.current.resume();
-        }
-      } catch (error) {
-        console.error('Failed to create AudioContext:', error);
-      }
-    } else if (audioContextRef.current.state === 'suspended') {
-      audioContextRef.current.resume();
-    }
-  };
-
-  // Safe play function to avoid interruption errors
-  const safePlay = async (audioElement: HTMLAudioElement) => {
-    if (isLoadingTrack) return false;
-    
-    try {
-      // Ensure audio context is initialized
-      initAudioContext();
-      
-      // Check if the audio element is actually ready
-      if (audioElement.readyState >= 2) {
-        await audioElement.play();
-        return true;
-      } else {
-        // Wait for the audio to be ready
-        return new Promise<boolean>((resolve) => {
-          const canPlayHandler = async () => {
-            try {
-              await audioElement.play();
-              resolve(true);
-            } catch (error) {
-              console.error('Play error after canplay:', error);
-              resolve(false);
-            }
-            audioElement.removeEventListener('canplay', canPlayHandler);
-          };
-          
-          audioElement.addEventListener('canplay', canPlayHandler, { once: true });
-          
-          // Add a timeout in case 'canplay' never fires
-          setTimeout(() => {
-            audioElement.removeEventListener('canplay', canPlayHandler);
-            resolve(false);
-          }, 3000);
-        });
-      }
-    } catch (error) {
-      console.error('Safe play error:', error);
-      return false;
-    }
-  };
-
-  // Setup inactivity detection to auto-stop music
+  // Create a silent audio element to bypass browser restrictions
   useEffect(() => {
-    // Track user activity
-    const updateActivity = () => {
-      setLastInteractionTime(Date.now());
+    // Create a silent audio element (this can often auto-play when muted)
+    const silentAudio = new Audio();
+    silentAudio.src = tracks[currentTrack].path;
+    silentAudio.muted = true;
+    silentAudio.loop = true;
+    silentAudioRef.current = silentAudio;
+
+    // Try to play the silent audio
+    const playSilent = async () => {
+      try {
+        await silentAudio.play();
+        setMutedAutoPlayStarted(true);
+        
+        // After muted auto-play succeeds, try to unmute and play the real audio
+        setTimeout(forceUnmutedPlayback, 500);
+      } catch (error) {
+        console.log("Silent auto-play failed, will try on user interaction");
+      }
     };
 
-    // Listen for user interactions
-    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
-    events.forEach(event => {
-      window.addEventListener(event, updateActivity);
-    });
-
-    // Check for inactivity - if user hasn't interacted for 3 minutes, stop the music
-    const inactivityCheck = setInterval(() => {
-      const now = Date.now();
-      const inactiveTime = now - lastInteractionTime;
-      const inactivityThreshold = 3 * 60 * 1000; // 3 minutes
-
-      if (isPlaying && inactiveTime > inactivityThreshold) {
-        // User has been inactive, pause the music
-        if (audioRef.current) {
-          audioRef.current.pause();
-          setIsPlaying(false);
-        }
-      }
-    }, 30000); // Check every 30 seconds
+    // Start silent playback immediately
+    if (autoPlay) {
+      playSilent();
+    }
 
     return () => {
-      // Clean up
-      events.forEach(event => {
-        window.removeEventListener(event, updateActivity);
-      });
-      clearInterval(inactivityCheck);
+      if (silentAudioRef.current) {
+        silentAudioRef.current.pause();
+        silentAudioRef.current = null;
+      }
     };
-  }, [isPlaying, lastInteractionTime]);
+  }, []);
+
+  // Force unmuted playback after silent play succeeds
+  const forceUnmutedPlayback = async () => {
+    if (!mutedAutoPlayStarted || !audioRef.current || isPlaying) return;
+    
+    try {
+      // First, try to play with the current audio
+      if (audioRef.current) {
+        // Make sure it's not muted
+        audioRef.current.muted = false;
+        audioRef.current.volume = 0.7;
+        await audioRef.current.play();
+        setIsPlaying(true);
+      }
+    } catch (error) {
+      console.log("Unmuted auto-play failed. Will try again on user interaction.");
+    }
+  };
 
   // Preload next track
   useEffect(() => {
@@ -156,55 +109,66 @@ export function usePhonkMusicViewModel(autoPlay: boolean = true): [PhonkMusicSta
     }
   }, [currentTrack]);
 
-  // Try to auto-play on component mount - only once, and muted
+  // Try to auto-play on component mount
   useEffect(() => {
-    let attemptTimeout: NodeJS.Timeout | null = null;
-    
-    if (autoPlay && !hasInteracted) {
-      setHasInteracted(true);
+    // Try immediately after audio is loaded
+    if (!isLoading && autoPlay && !isPlaying) {
+      // Aggressive auto-play attempts every second for the first 5 seconds
+      let attempts = 0;
+      const maxAttempts = 5;
       
-      // Only try once after a delay to let everything initialize
-      attemptTimeout = setTimeout(async () => {
-        if (audioRef.current && !isPlaying && !isLoadingTrack) {
-          // Ensure it's muted for autoplay
-          audioRef.current.muted = true;
-          setIsMuted(true);
-          
-          const success = await safePlay(audioRef.current);
-          if (success) {
+      const attemptInterval = setInterval(async () => {
+        attempts++;
+        
+        if (isPlaying || attempts > maxAttempts) {
+          clearInterval(attemptInterval);
+          return;
+        }
+        
+        try {
+          if (audioRef.current) {
+            // Try with both muted and unmuted
+            audioRef.current.muted = false; 
+            audioRef.current.volume = 0.7;
+            await audioRef.current.play();
             setIsPlaying(true);
-            // Show a visual indicator that music is playing but muted
-            console.log('Auto-play successful! Music is playing muted. Click to unmute.');
+            clearInterval(attemptInterval);
           }
+        } catch (error) {
+          // Keep trying
+          console.log(`Auto-play attempt ${attempts} failed`);
         }
       }, 1000);
-    }
-    
-    return () => {
-      if (attemptTimeout) clearTimeout(attemptTimeout);
-    };
-  }, [autoPlay]);
-
-  // For user interaction to trigger auto-play
-  useEffect(() => {
-    // Try to play on user interaction
-    const handleUserInteraction = async () => {
-      // Initialize audio context on user interaction
-      initAudioContext();
       
-      if (autoPlay && !isPlaying && !isLoadingTrack && audioRef.current) {
-        const success = await safePlay(audioRef.current);
-        if (success) {
-          setIsPlaying(true);
+      return () => clearInterval(attemptInterval);
+    }
+  }, [isLoading, autoPlay, isPlaying]);
+
+  // For auto-play when site loads - user interaction method
+  useEffect(() => {
+    // Try to play on any user interaction
+    const handleUserInteraction = async () => {
+      if (!hasInteracted && autoPlay && !isPlaying) {
+        setHasInteracted(true);
+        
+        try {
+          if (audioRef.current) {
+            audioRef.current.muted = false;
+            audioRef.current.volume = 0.7;
+            await audioRef.current.play();
+            setIsPlaying(true);
+          }
+        } catch (error) {
+          console.log("Play failed even after user interaction");
         }
       }
-      
-      // Update last interaction time
-      setLastInteractionTime(Date.now());
     };
 
-    // Use just a few key events to prevent multiple handlers firing
-    const interactionEvents = ['click', 'keydown'];
+    // Multiple event types to catch any user interaction
+    const interactionEvents = [
+      'click', 'touchstart', 'touchend', 'mousedown', 
+      'keydown', 'scroll', 'mousemove'
+    ];
     
     interactionEvents.forEach(event => {
       document.addEventListener(event, handleUserInteraction, { once: true });
@@ -215,79 +179,54 @@ export function usePhonkMusicViewModel(autoPlay: boolean = true): [PhonkMusicSta
         document.removeEventListener(event, handleUserInteraction);
       });
     };
-  }, [autoPlay, isPlaying, isLoadingTrack]);
+  }, [autoPlay, hasInteracted, isPlaying]);
 
-  // Handle audio loading and track changes
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
     const loadAudio = async () => {
-      if (isLoadingTrack) return; // Prevent multiple simultaneous loads
-      
-      setIsLoadingTrack(true);
-      setIsLoading(true);
-      setError(null);
-      
       try {
-        // Pause any current playback before changing source
-        if (audio.played.length > 0) {
-          audio.pause();
-        }
+        setIsLoading(true);
+        setError(null);
         
-        // Update source and reload
-        audio.src = tracks[currentTrack].path;
-        audio.load();
+        // Create a new Audio element and attempt to load it
+        const tempAudio = new Audio();
+        tempAudio.src = tracks[currentTrack].path;
         
-        // Wait for the audio to be ready
-        await new Promise<void>((resolve, reject) => {
-          const loadedHandler = () => {
-            resolve();
-            audio.removeEventListener('canplaythrough', loadedHandler);
-          };
-          
-          const errorHandler = (e: Event) => {
-            reject(new Error('Failed to load audio'));
-            audio.removeEventListener('error', errorHandler);
-          };
-          
-          audio.addEventListener('canplaythrough', loadedHandler, { once: true });
-          audio.addEventListener('error', errorHandler, { once: true });
-          
-          // Add a timeout in case events never fire
-          setTimeout(() => {
-            audio.removeEventListener('canplaythrough', loadedHandler);
-            audio.removeEventListener('error', errorHandler);
-            resolve(); // Resolve anyway to prevent hanging
-          }, 5000);
+        await new Promise((resolve, reject) => {
+          tempAudio.oncanplaythrough = resolve;
+          tempAudio.onerror = reject;
+          tempAudio.load();
         });
-        
+
+        // If successful, update the actual audio element
+        audio.src = tracks[currentTrack].path;
         setIsLoading(false);
-        
-        // If already playing, continue playing the new track
+
         if (isPlaying) {
-          // Add a small delay to ensure the audio is fully ready
-          if (playRequestTimeoutRef.current) {
-            clearTimeout(playRequestTimeoutRef.current);
+          try {
+            await audio.play();
+          } catch (playError) {
+            console.error('Play error:', playError);
+            setIsPlaying(false);
           }
-          
-          playRequestTimeoutRef.current = setTimeout(async () => {
-            try {
-              // Keep the current mute state when changing tracks
-              audio.muted = isMuted;
-              await safePlay(audio);
-            } catch (error) {
-              console.error('Play error after loading:', error);
-              setIsPlaying(false);
-            }
-          }, 100);
+        } else if (autoPlay && !hasInteracted) {
+          // Try to start playback again
+          try {
+            audio.muted = false;
+            audio.volume = 0.7;
+            await audio.play();
+            setIsPlaying(true);
+          } catch (error) {
+            // Ignore, we'll keep trying
+          }
         }
       } catch (error) {
         console.error('Audio loading error:', error);
         setError('Failed to load audio');
+        setIsLoading(false);
         setIsPlaying(false);
-      } finally {
-        setIsLoadingTrack(false);
       }
     };
 
@@ -300,12 +239,9 @@ export function usePhonkMusicViewModel(autoPlay: boolean = true): [PhonkMusicSta
     audio.addEventListener('ended', handleEnded);
 
     return () => {
-      if (playRequestTimeoutRef.current) {
-        clearTimeout(playRequestTimeoutRef.current);
-      }
       audio.removeEventListener('ended', handleEnded);
     };
-  }, [currentTrack, isPlaying, isMuted]);
+  }, [currentTrack, isPlaying, autoPlay, hasInteracted]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -323,24 +259,15 @@ export function usePhonkMusicViewModel(autoPlay: boolean = true): [PhonkMusicSta
 
   const togglePlay = async () => {
     const audio = audioRef.current;
-    if (!audio || isLoading || isLoadingTrack) return;
+    if (!audio || isLoading) return;
 
     try {
-      // Initialize audio context on user interaction
-      initAudioContext();
-      
       if (isPlaying) {
         audio.pause();
-        setIsPlaying(false);
       } else {
-        const success = await safePlay(audio);
-        if (success) {
-          setIsPlaying(true);
-        }
+        await audio.play();
       }
-      
-      // Update last interaction time when user manually toggles
-      setLastInteractionTime(Date.now());
+      setIsPlaying(!isPlaying);
     } catch (error) {
       console.error('Playback error:', error);
       setError('Failed to play audio');
@@ -348,27 +275,8 @@ export function usePhonkMusicViewModel(autoPlay: boolean = true): [PhonkMusicSta
     }
   };
 
-  const toggleMute = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    
-    audio.muted = !audio.muted;
-    setIsMuted(audio.muted);
-    
-    // Initialize audio context on user interaction
-    initAudioContext();
-    
-    // Update last interaction time
-    setLastInteractionTime(Date.now());
-  };
-
   const nextTrack = () => {
-    if (isLoadingTrack) return; // Prevent changing tracks during loading
-    
     setCurrentTrack((prev) => (prev + 1) % tracks.length);
-    
-    // Update last interaction time when user changes track
-    setLastInteractionTime(Date.now());
   };
 
   return [
@@ -378,13 +286,11 @@ export function usePhonkMusicViewModel(autoPlay: boolean = true): [PhonkMusicSta
       currentTrack,
       isLoading,
       error,
-      tracks,
-      isMuted
+      tracks
     },
     {
       togglePlay,
       nextTrack,
-      toggleMute,
       audioRef,
       nextAudioRef
     }
