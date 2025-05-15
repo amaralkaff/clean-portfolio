@@ -23,7 +23,7 @@ const MainContent: React.FC<MainContentProps> = ({ isVisible }) => {
   return (
     <>
       <motion.div
-        className="pt-12 flex items-center justify-center h-full w-full md:w-2/3"
+        className="pt-20 md:pt-12 flex items-center justify-center h-full w-full md:w-2/3"
         initial="hidden"
         animate={isVisible ? "visible" : "hidden"}
         variants={fadeUpVariant}

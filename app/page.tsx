@@ -40,7 +40,7 @@ const Home = () => {
   }
 
   return (
-    <div className="flex flex-col md:flex-row justify-center items-center min-h-screen bg-gray-50">
+    <div className="flex flex-col md:flex-row justify-center items-center min-h-screen bg-gray-50 pt-14 md:pt-0">
       <Suspense fallback={<LottieLoader />}>
         <div
           className={`order-2 md:order-1 w-full md:w-1/2 h-screen overflow-auto transition-all duration-500 ${

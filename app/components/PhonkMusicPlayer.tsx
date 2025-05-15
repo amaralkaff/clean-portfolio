@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Play, Pause, SkipForward, SkipBack, Minimize2 } from 'lucide-react';
+import { Play, Pause, SkipForward, Minimize2 } from 'lucide-react';
 import { usePhonkMusicViewModel } from '../viewModels/PhonkMusicViewModel';
 
 interface PhonkMusicPlayerProps {
@@ -13,7 +13,7 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
 }) => {
   const [state, actions] = usePhonkMusicViewModel(autoPlay);
   const { isPlaying, progress, currentTrack, isLoading, error, tracks } = state;
-  const { togglePlay, nextTrack, previousTrack, audioRef, nextAudioRef } = actions;
+  const { togglePlay, nextTrack, audioRef, nextAudioRef } = actions;
   const initCompleteRef = useRef(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [visualizerBars, setVisualizerBars] = useState([0.3, 0.8, 0.5]);
@@ -27,6 +27,23 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
       audioRef.current.preload = 'auto';
     }
   }, []);
+
+  // Auto-play next track when current track ends
+  useEffect(() => {
+    const handleEnded = () => {
+      nextTrack();
+    };
+
+    if (audioRef.current) {
+      audioRef.current.addEventListener('ended', handleEnded);
+    }
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.removeEventListener('ended', handleEnded);
+      }
+    };
+  }, [nextTrack]);
 
   // Animate visualizer bars
   useEffect(() => {
@@ -51,7 +68,7 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
     <div 
       className={`fixed transition-all duration-300 z-50 ${
         isExpanded 
-          ? "top-4 left-1/2 transform -translate-x-1/2"
+          ? "top-2 left-[53%] transform -translate-x-1/2"
           : "bottom-8 right-8 w-16 h-16"
       }`}
     >
@@ -62,14 +79,6 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
       {isExpanded ? (
         // Expanded player
         <div className="bg-gray bg-opacity-80 backdrop-blur-sm text-black px-4 py-2 rounded-full flex items-center space-x-4 transition-all duration-300 hover:bg-opacity-100">
-          <button 
-            onClick={previousTrack}
-            disabled={isLoading} 
-            className={`focus:outline-none transition-transform duration-200 ease-in-out transform hover:scale-110 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            <SkipBack size={18} />
-          </button>
-          
           <button 
             onClick={togglePlay}
             disabled={isLoading} 
