@@ -20,6 +20,7 @@
     "react": "^19.1.0",
     "react-animated-cursor": "^2.11.2",
     "react-dom": "^19.1.0",
+    "react-h5-audio-player": "^3.10.0-rc.1",
     "react-lottie": "^1.2.10",
     "react-lottie-player": "^2.1.0"
   },

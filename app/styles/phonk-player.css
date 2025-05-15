@@ -1,0 +1,83 @@
+/* Custom style for the phonk player */
+.phonk-player.rhap_container {
+  background-color: transparent;
+  box-shadow: none;
+  padding: 0;
+  width: 100%;
+}
+
+.phonk-player .rhap_progress-container {
+  background-color: #4c4848;
+  height: 4px;
+  border-radius: 2px;
+  margin: 0 0 8px 0;
+}
+
+.phonk-player .rhap_progress-bar {
+  background-color: #666;
+  border-radius: 2px;
+}
+
+.phonk-player .rhap_progress-filled {
+  background-color: #ff0000;
+  border-radius: 2px;
+}
+
+.phonk-player .rhap_progress-indicator {
+  background-color: #f00;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  top: -4px;
+}
+
+.phonk-player .rhap_current-time, 
+.phonk-player .rhap_time {
+  color: white;
+  font-size: 0.8rem;
+}
+
+.phonk-player .rhap_volume-button,
+.phonk-player .rhap_main-controls-button {
+  color: white;
+}
+
+.phonk-player .rhap_main-controls-button {
+  margin: 0 8px;
+}
+
+.phonk-player .rhap_play-pause-button {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.phonk-player .rhap_volume-bar {
+  background-color: #4c4848;
+  border-radius: 2px;
+}
+
+.phonk-player .rhap_button-clear {
+  color: white;
+}
+
+.phonk-player .rhap_volume-bar-area {
+  height: 4px;
+}
+
+.phonk-player .rhap_volume-indicator {
+  width: 12px;
+  height: 12px;
+  background: #f00;
+  top: -4px;
+  margin-left: -6px;
+}
+
+.phonk-player .rhap_volume-filled {
+  background: #ff0000;
+}
+
+.phonk-player .rhap_controls-section {
+  margin: 8px 0;
+} 

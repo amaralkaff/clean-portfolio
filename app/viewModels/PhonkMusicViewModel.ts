@@ -19,6 +19,7 @@ export interface PhonkMusicState {
 export interface PhonkMusicActions {
   togglePlay: () => Promise<void>;
   nextTrack: () => void;
+  previousTrack: () => void;
   audioRef: React.RefObject<HTMLAudioElement | null>;
   nextAudioRef: React.RefObject<HTMLAudioElement | null>;
 }
@@ -325,6 +326,23 @@ export function usePhonkMusicViewModel(autoPlay: boolean = true): [PhonkMusicSta
     setUserPaused(wasPaused);
   };
 
+  const previousTrack = () => {
+    // Save current state of userPaused to avoid unintended auto-play
+    const wasPaused = userPaused;
+    
+    // Set this flag to true to indicate this was an intentional track change
+    setTrackChangedProgrammatically(true);
+    
+    // Change to previous track with wraparound
+    setCurrentTrack((prev) => (prev === 0 ? tracks.length - 1 : prev - 1));
+    
+    // Reset currentTime when changing tracks
+    currentTimeRef.current = 0;
+    
+    // Keep userPaused state across track changes
+    setUserPaused(wasPaused);
+  };
+
   return [
     {
       isPlaying,
@@ -337,6 +355,7 @@ export function usePhonkMusicViewModel(autoPlay: boolean = true): [PhonkMusicSta
     {
       togglePlay,
       nextTrack,
+      previousTrack,
       audioRef,
       nextAudioRef
     }
