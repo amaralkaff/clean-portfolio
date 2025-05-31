@@ -1,4 +1,5 @@
 import { useRef, useEffect, useCallback } from 'react';
+import { useTheme } from '../context/ThemeContext';
 
 // Define Particle class before using it
 class Particle {
@@ -52,6 +53,7 @@ class Particle {
     const particles = useRef<Particle[]>([]);
     const animationRef = useRef<number | null>(null);
     const ctx = useRef<CanvasRenderingContext2D | null>(null);
+    const { theme } = useTheme();
   
     const clearCanvas = useCallback(() => {
       if (!canvasRef.current || !ctx.current) return;
@@ -126,17 +128,20 @@ class Particle {
         }))
       ];
   
+      // Choose particle color based on theme
+      const particleColor = theme === 'dark' ? 'rgba(200, 200, 200, 0.8)' : 'rgba(100, 100, 100, 0.8)';
+  
       positions.forEach(pos => {
         particles.current.push(
           new Particle(
             pos.x,
             pos.y,
             videoCenter,
-            'rgb(128, 128, 128)'
+            particleColor
           )
         );
       });
-    }, [targetRef]);
+    }, [targetRef, theme]);
   
     useEffect(() => {
       if (!isActive || !ctx.current) return;
@@ -144,8 +149,12 @@ class Particle {
       const animate = () => {
         if (!ctx.current) return;
         
-        // Add slight transparency to create fade effect
-        ctx.current.fillStyle = "rgba(255, 255, 255, 0.07)";
+        // Use different fade effect based on theme
+        if (theme === 'dark') {
+          ctx.current.fillStyle = "rgba(26, 26, 26, 0.07)";
+        } else {
+          ctx.current.fillStyle = "rgba(255, 255, 255, 0.07)";
+        }
         ctx.current.fillRect(0, 0, canvasRef.current!.width, canvasRef.current!.height);
         
         particles.current = particles.current.filter(particle => {
@@ -170,7 +179,7 @@ class Particle {
           cancelAnimationFrame(animationRef.current);
         }
       };
-    }, [isActive, createParticles]);
+    }, [isActive, createParticles, theme]);
   
     return (
       <canvas

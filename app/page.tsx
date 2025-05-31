@@ -1,6 +1,7 @@
 "use client";
 import React, { Suspense, useEffect } from "react";
 import { useAppViewModel } from "./viewModels/AppViewModel";
+import { useTheme } from "./context/ThemeContext";
 
 // Use next/dynamic instead of the import from 'next/dynamic'
 import dynamic from "next/dynamic";
@@ -12,11 +13,15 @@ const MainContent = dynamic(() => import("./components/MainContent"));
 const ProjectList = dynamic(() => import("./components/ProjectList"));
 const Footer = dynamic(() => import("./components/Footer"));
 const PhonkMusicPlayer = dynamic(() => import("./components/PhonkMusicPlayer"));
+const ThemeToggle = dynamic(() => import("./components/ThemeToggle"), {
+  ssr: false
+});
 
 const Home = () => {
   const [state, actions] = useAppViewModel();
   const { modalVisible, isLoading } = state;
   const { setModalVisible } = actions;
+  const { theme } = useTheme();
 
   // This effect helps enable auto-play by adding a page-level click handler
   useEffect(() => {
@@ -40,7 +45,9 @@ const Home = () => {
   }
 
   return (
-    <div className="flex flex-col md:flex-row justify-center items-center min-h-screen bg-gray-50 pt-14 md:pt-0">
+    <div className="flex flex-col md:flex-row justify-center items-center min-h-screen pt-14 md:pt-0">
+      <ThemeToggle />
+      
       <Suspense fallback={<LottieLoader />}>
         <div
           className={`order-2 md:order-1 w-full md:w-1/2 h-screen overflow-auto transition-all duration-500 ${

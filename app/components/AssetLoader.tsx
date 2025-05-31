@@ -1,6 +1,7 @@
 // File: app/components/AssetLoader.tsx
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useTheme } from '../context/ThemeContext';
 
 const loadImages = async (imageUrls: string[]): Promise<string[]> => {
   const loadImage = (url: string): Promise<void> => {
@@ -44,6 +45,7 @@ const AssetLoader: React.FC<{ onLoadComplete: () => void }> = ({ onLoadComplete 
   const [failedImages, setFailedImages] = useState<string[]>([]);
   const [retryCount, setRetryCount] = useState(0);
   const maxRetries = 3;
+  const { theme } = useTheme();
 
   useEffect(() => {
     const logoUrls = [
@@ -110,23 +112,23 @@ const AssetLoader: React.FC<{ onLoadComplete: () => void }> = ({ onLoadComplete 
 
   return (
     <motion.div
-      className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center"
+      className={`fixed inset-0 bg-[var(--bg-gradient-light-1)] z-50 flex flex-col items-center justify-center`}
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
     >
       <div className="w-64 h-2 bg-gray-200 rounded-full overflow-hidden">
         <motion.div
-          className="h-full bg-black"
+          className={`h-full ${theme === 'dark' ? 'bg-white' : 'bg-black'}`}
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.3 }}
         />
       </div>
-      <span className="mt-4 text-gray-600">
+      <span className={`mt-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
         Loading assets... {progress}%
         {failedImages.length > 0 && retryCount < maxRetries && (
-          <span className="block text-sm text-gray-400">
+          <span className={`block text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`}>
             Retrying failed images... ({retryCount + 1}/{maxRetries})
           </span>
         )}

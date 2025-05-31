@@ -1,9 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 import lottie from 'lottie-web';
 import animationData from '../../public/loading.json';
+import { useTheme } from '../context/ThemeContext';
 
 const LottieLoader: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (containerRef.current) {
@@ -20,7 +22,7 @@ const LottieLoader: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex items-center justify-center h-screen">
+    <div className="flex items-center justify-center h-screen bg-transparent">
       <div ref={containerRef} style={{ width: 200, height: 200 }} />
     </div>
   );

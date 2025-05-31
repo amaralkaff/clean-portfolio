@@ -1,9 +1,26 @@
 @import "tailwindcss";
 
+:root {
+  --bg-gradient-light-1: #ffff;
+  --bg-gradient-light-2: #E5E7EB;
+  --text-primary: #000000;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f3f4f6;
+}
+
+.dark {
+  --bg-gradient-light-1: #1a1a1a;
+  --bg-gradient-light-2: #2d3748;
+  --text-primary: #ffffff;
+  --bg-card: #2d3748;
+  --bg-card-hover: #4a5568;
+}
+
 body {
   background-size: 300% 300%;
-  background-image: linear-gradient(-45deg, #ffff 0%, #E5E7EB 25%, #ffff 50%, #E5E7EB 75%);
+  background-image: linear-gradient(-45deg, var(--bg-gradient-light-1) 0%, var(--bg-gradient-light-2) 25%, var(--bg-gradient-light-1) 50%, var(--bg-gradient-light-2) 75%);
   animation: background-shift 10s ease infinite;
+  color: var(--text-primary);
 }
 
 @keyframes background-shift {

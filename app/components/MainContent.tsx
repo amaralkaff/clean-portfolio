@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import PDFViewerModal from "./PDFViewerModal";
 import { useMainContentViewModel } from "../viewModels/MainContentViewModel";
+import { useTheme } from "../context/ThemeContext";
 
 interface MainContentProps {
   isVisible: boolean;
@@ -19,6 +20,7 @@ const MainContent: React.FC<MainContentProps> = ({ isVisible }) => {
   const [state, actions] = useMainContentViewModel();
   const { isPDFModalOpen, personalInfo } = state;
   const { handleResumeClick, setIsPDFModalOpen } = actions;
+  const { theme } = useTheme();
 
   return (
     <>
@@ -31,7 +33,7 @@ const MainContent: React.FC<MainContentProps> = ({ isVisible }) => {
       >
         <div className="text-center">
           <div className="text-lg font-bold">
-            <span className="text-black">{personalInfo.name}</span>
+            <span className="text-[var(--text-primary)]">{personalInfo.name}</span>
             <br />
             <span className="text-gray-600">{personalInfo.tagline}</span>
           </div>

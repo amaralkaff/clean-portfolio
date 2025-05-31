@@ -12,6 +12,7 @@ import Link from "next/link";
 import CircuitAnimation from "./CircuitAnimation";
 import { useProjectListViewModel } from "../viewModels/ProjectListViewModel";
 import { Project } from "../models/ProjectData";
+import { useTheme } from "../context/ThemeContext";
 
 const LocalVideo = React.lazy(() => import("./LocalVideo"));
 
@@ -33,6 +34,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
   const [state, actions] = useProjectListViewModel(onModalToggle);
   const { selectedProject, isMobile, isActive, projects } = state;
   const { handleInteraction, closeModal, setIsActive } = actions;
+  const { theme } = useTheme();
 
   return (
     <div
@@ -60,9 +62,13 @@ const ProjectList: React.FC<ProjectListProps> = ({
             whileHover={{ scale: 1.03 }}
             onMouseEnter={() => !isMobile && handleInteraction(index)}
             onClick={() => isMobile && handleInteraction(index)}
-            className="flex justify-between items-center w-full p-4 rounded-lg hover:bg-gray-100 cursor-default"
+            className={`flex justify-between items-center w-full p-4 rounded-lg cursor-default ${
+              theme === 'dark' 
+                ? 'bg-gray-800/40 hover:bg-gray-700/60 backdrop-blur-sm' 
+                : 'bg-transparent hover:bg-gray-100/50'
+            }`}
           >
-            <span className="text-black text-md font-medium w-1/2 truncate">
+            <span className="text-[var(--text-primary)] text-md font-medium w-1/2 truncate">
               {project.name}
             </span>
             <span className="text-gray-400 text-sm md:text-base w-1/4 text-right">
@@ -75,21 +81,29 @@ const ProjectList: React.FC<ProjectListProps> = ({
       {selectedProject !== null && (
         <motion.div
           ref={modalRef}
-          className={`fixed w-full md:w-2/5 lg:w-2/4 h-auto bg-white rounded-lg flex flex-col justify-center items-center transition-all duration-300 md:right-12 p-4 z-20 ${
+          className={`fixed w-full md:w-2/5 lg:w-2/4 h-auto rounded-lg flex flex-col justify-center items-center transition-all duration-300 md:right-12 p-4 z-20 ${
+            theme === 'dark' 
+              ? 'bg-gray-800/70 backdrop-blur-sm border border-gray-700' 
+              : 'bg-transparent backdrop-blur-sm border border-gray-200'
+          } ${
             isMobile ? "inset-0 bg-black bg-opacity-50" : ""
           }`}
           variants={fadeUpVariant}
           transition={{ duration: 0.5 }}
         >
           <button
-            className="fixed top-12 md:top-3 right-3 text-white bg-black rounded-full p-2 hover:text-gray-300 z-50 md:hidden"
+            className={`fixed top-12 md:top-3 right-3 rounded-full p-2 z-50 md:hidden ${
+              theme === 'dark'
+                ? 'bg-gray-700/70 text-gray-300 hover:text-white'
+                : 'text-black bg-gray-200/70 hover:bg-gray-300/70'
+            }`}
             onClick={closeModal}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
-              stroke="white"
+              stroke="currentColor"
               strokeWidth={2}
               className="h-6 w-6"
             >
@@ -107,7 +121,9 @@ const ProjectList: React.FC<ProjectListProps> = ({
                   projects[selectedProject]?.name === "Bang Abah"
                     ? "aspect-w-9 aspect-h-16"
                     : "aspect-w-16 aspect-h-9"
-                } bg-gray-100 rounded-lg animate-pulse`}
+                } ${
+                  theme === 'dark' ? 'bg-gray-700/40' : 'bg-gray-100/30'
+                } rounded-lg animate-pulse`}
               />
             }
           >
@@ -142,7 +158,11 @@ const ProjectList: React.FC<ProjectListProps> = ({
                       className="mr-2 hover:opacity-80"
                     />
                   </Link>
-                  <span className="text-md text-gray-800">{tech.name}</span>
+                  <span className={`text-md ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-gray-800'
+                  }`}>
+                    {tech.name}
+                  </span>
                 </div>
               ))}
             </div>

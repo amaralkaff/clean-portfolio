@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Play, Pause, SkipForward, Minimize2 } from 'lucide-react';
 import { usePhonkMusicViewModel } from '../viewModels/PhonkMusicViewModel';
+import { useTheme } from '../context/ThemeContext';
 
 interface PhonkMusicPlayerProps {
   autoPlay?: boolean;
@@ -18,6 +19,7 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [visualizerBars, setVisualizerBars] = useState([0.3, 0.8, 0.5]);
   const [pulseAnimation, setPulseAnimation] = useState(false);
+  const { theme } = useTheme();
 
   // Set up audio element only once when the component mounts
   useEffect(() => {
@@ -94,17 +96,17 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
       
       {isExpanded ? (
         // Expanded player
-        <div className="bg-gray bg-opacity-80 backdrop-blur-sm text-black px-4 py-2 rounded-full flex items-center space-x-4 transition-all duration-300 hover:bg-opacity-100">
+        <div className="bg-gray bg-opacity-80 backdrop-blur-sm px-4 py-2 rounded-full flex items-center space-x-4 transition-all duration-300 hover:bg-opacity-100">
           <button 
             onClick={togglePlay}
             disabled={isLoading} 
             className={`focus:outline-none transition-transform duration-200 ease-in-out transform hover:scale-110 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+            {isPlaying ? <Pause size={18} className={theme === 'dark' ? 'text-white' : ''} /> : <Play size={18} className={theme === 'dark' ? 'text-white' : ''} />}
           </button>
 
           <div className="flex flex-col w-48 items-center">
-            <div className="text-xs font-medium truncate text-center w-full">
+            <div className={`text-xs font-medium truncate text-center w-full ${theme === 'dark' ? 'text-white' : ''}`}>
               {isLoading ? 'Loading...' : error || tracks[currentTrack].name}
             </div>
             <div className="w-full h-1 bg-gray-200 rounded-full mt-1 overflow-hidden">
@@ -120,14 +122,14 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
             disabled={isLoading} 
             className={`focus:outline-none transition-transform duration-200 ease-in-out transform hover:scale-110 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            <SkipForward size={18} />
+            <SkipForward size={18} className={theme === 'dark' ? 'text-white' : ''} />
           </button>
           
           <button 
             onClick={toggleExpanded} 
             className={`focus:outline-none transition-transform duration-200 ease-in-out transform hover:scale-110 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            <Minimize2 size={18} />
+            <Minimize2 size={18} className={theme === 'dark' ? 'text-white' : ''} />
           </button>
         </div>
       ) : (
@@ -138,7 +140,7 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
         >
           <div className="absolute top-0 left-0 right-0 h-1 bg-gray-200 overflow-hidden">
             <div 
-              className="h-full bg-black transition-all duration-300 ease-out"
+              className={`h-full ${theme === 'dark' ? 'bg-white' : 'bg-black'} transition-all duration-300 ease-out`}
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -146,26 +148,26 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
           <div className="flex flex-col items-center justify-center">
             <div className="flex items-center justify-center h-6 space-x-0.5 mb-1">
               <div 
-                className="w-1 bg-black rounded-sm transition-all duration-300"
+                className={`w-1 ${theme === 'dark' ? 'bg-white' : 'bg-black'} rounded-sm transition-all duration-300`}
                 style={{ height: isPlaying ? `${visualizerBars[0] * 24}px` : '16px' }}
               ></div>
               <div 
-                className="w-1 bg-black rounded-sm transition-all duration-300"
+                className={`w-1 ${theme === 'dark' ? 'bg-white' : 'bg-black'} rounded-sm transition-all duration-300`}
                 style={{ height: isPlaying ? `${visualizerBars[1] * 24}px` : '10px' }}
               ></div>
               <div 
-                className="w-1 bg-black rounded-sm transition-all duration-300"
+                className={`w-1 ${theme === 'dark' ? 'bg-white' : 'bg-black'} rounded-sm transition-all duration-300`}
                 style={{ height: isPlaying ? `${visualizerBars[2] * 24}px` : '5px' }}
               ></div>
             </div>
             
-            <div className={`text-[8px] font-bold text-black ${isPlaying ? 'opacity-100' : 'opacity-70'}`}>
+            <div className={`text-[8px] font-bold ${theme === 'dark' ? 'text-white' : 'text-black'} ${isPlaying ? 'opacity-100' : 'opacity-70'}`}>
               {isPlaying ? "NOW PLAYING" : "CLICK TO PLAY"}
             </div>
           </div>
           
           {/* Subtle glow effect */}
-          <div className={`absolute inset-0 bg-black opacity-0 hover:opacity-10 transition-opacity duration-300 rounded-lg ${pulseAnimation && !isPlaying ? 'ring-2 ring-black ring-opacity-30' : ''}`}></div>
+          <div className={`absolute inset-0 ${theme === 'dark' ? 'bg-white' : 'bg-black'} opacity-0 hover:opacity-10 transition-opacity duration-300 rounded-lg ${pulseAnimation && !isPlaying ? `ring-2 ${theme === 'dark' ? 'ring-white' : 'ring-black'} ring-opacity-30` : ''}`}></div>
         </div>
       )}
     </div>
