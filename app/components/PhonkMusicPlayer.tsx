@@ -89,20 +89,19 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
 
   // Auto-play next track when current track ends
   useEffect(() => {
+    const currentAudio = audioRef.current;
+    if (!currentAudio) return;
+
     const handleEnded = () => {
       nextTrack();
     };
 
-    if (audioRef.current) {
-      audioRef.current.addEventListener('ended', handleEnded);
-    }
+    currentAudio.addEventListener('ended', handleEnded);
 
     return () => {
-      if (audioRef.current) {
-        audioRef.current.removeEventListener('ended', handleEnded);
-      }
+      currentAudio.removeEventListener('ended', handleEnded);
     };
-  }, [nextTrack]);
+  }, [nextTrack, audioRef]);
 
   // Animate visualizer bars
   useEffect(() => {

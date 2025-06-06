@@ -7,12 +7,21 @@ import { useTheme } from "./context/ThemeContext";
 import dynamic from "next/dynamic";
 
 const LottieLoader = dynamic(() => import("./components/CustomLottie"), { 
-  ssr: false 
+  ssr: false,
+  loading: () => <div className="w-full h-screen flex items-center justify-center">Loading...</div>
 });
-const MainContent = dynamic(() => import("./components/MainContent"));
-const ProjectList = dynamic(() => import("./components/ProjectList"));
-const Footer = dynamic(() => import("./components/Footer"));
-const PhonkMusicPlayer = dynamic(() => import("./components/PhonkMusicPlayer"));
+const MainContent = dynamic(() => import("./components/MainContent"), {
+  ssr: false
+});
+const ProjectList = dynamic(() => import("./components/ProjectList"), {
+  ssr: false
+});
+const Footer = dynamic(() => import("./components/Footer"), {
+  ssr: false
+});
+const PhonkMusicPlayer = dynamic(() => import("./components/PhonkMusicPlayer"), {
+  ssr: false
+});
 const ThemeToggle = dynamic(() => import("./components/ThemeToggle"), {
   ssr: false
 });

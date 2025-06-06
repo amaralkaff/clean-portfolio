@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import Image from 'next/image';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 
@@ -95,6 +95,9 @@ const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
           onLoad={handleLoad}
           onError={handleError}
           loading={lazyLoad ? 'lazy' : 'eager'}
+          priority={!lazyLoad}
+          placeholder="blur"
+          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyBhtI"
         />
       )}
 
@@ -123,4 +126,4 @@ const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
   );
 };
 
-export default ProgressiveImage;
+export default memo(ProgressiveImage);

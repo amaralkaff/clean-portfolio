@@ -7,18 +7,36 @@ import { ThemeProvider } from './context/ThemeContext'
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' })
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+}
+
 export const metadata: Metadata = {
   title: 'amangLy.',
   description: 'amangLy. - A personal portfolio by amangly.',
+  keywords: ['portfolio', 'developer', 'web development', 'react', 'nextjs'],
+  authors: [{ name: 'amangLy' }],
   openGraph: {
+    title: 'amangLy. - Portfolio',
+    description: 'amangLy. - A personal portfolio by amangly.',
     siteName: 'amangLy.',
     url: 'https://amangly.pro',
+    type: 'website',
     images: [
       {
         url: 'https://amangly.pro/images/image.png',
+        width: 1200,
+        height: 630,
         alt: 'amangLy. Portfolio Preview Image',
       },
     ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'amangLy. - Portfolio',
+    description: 'amangLy. - A personal portfolio by amangly.',
+    images: ['https://amangly.pro/images/image.png'],
   },
 }
 

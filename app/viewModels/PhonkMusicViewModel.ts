@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 
 export interface MusicTrack {
   path: string;
@@ -43,7 +43,7 @@ export function usePhonkMusicViewModel(autoPlay: boolean = true): [PhonkMusicSta
   const silentAudioRef = useRef<HTMLAudioElement | null>(null);
   const currentTimeRef = useRef<number>(0);
 
-  const tracks: MusicTrack[] = [
+  const tracks: MusicTrack[] = useMemo(() => [
     { path: '/music/FUNK MI CAMINO.mp3', name: 'FUNK MI CAMINO' },
     { path: '/music/X-TALI.mp3', name: 'X-TALI'},
     { path: '/music/Montagem Do Cosmos.mp3', name: 'Montagem Do Cosmos' },
@@ -51,7 +51,7 @@ export function usePhonkMusicViewModel(autoPlay: boolean = true): [PhonkMusicSta
     { path: '/music/EEYUH! x Fluxxwave.mp3', name: 'EEYUH! x Fluxxwave' },
     { path: '/music/FUNK UNIVERSO.mp3', name: 'FUNK UNIVERSO' },
     { path: '/music/LDRR.mp3', name: 'LDRR' },
-  ];
+  ], []);
 
   // Simple autoplay attempt once on load
   useEffect(() => {
@@ -101,7 +101,7 @@ export function usePhonkMusicViewModel(autoPlay: boolean = true): [PhonkMusicSta
       nextAudioRef.current.src = tracks[nextTrackIndex].path;
       nextAudioRef.current.load();
     }
-  }, [currentTrack]);
+  }, [currentTrack, tracks]);
 
 
   // Single user interaction handler for autoplay
@@ -148,6 +148,24 @@ export function usePhonkMusicViewModel(autoPlay: boolean = true): [PhonkMusicSta
       audio.removeEventListener('timeupdate', handleTimeUpdate);
     };
   }, []);
+
+  // Define nextTrack before it's used in useEffect
+  const nextTrack = useCallback(() => {
+    // Save current state of userPaused to avoid unintended auto-play
+    const wasPaused = userPaused;
+    
+    // Set this flag to true to indicate this was an intentional track change
+    setTrackChangedProgrammatically(true);
+    
+    // Change the track
+    setCurrentTrack((prev) => (prev + 1) % tracks.length);
+    
+    // Reset currentTime when changing tracks
+    currentTimeRef.current = 0;
+    
+    // Keep userPaused state across track changes
+    setUserPaused(wasPaused);
+  }, [userPaused, tracks.length]);
 
   // Handle track loading - but prevent infinite loops with tracked flags
   useEffect(() => {
@@ -205,7 +223,7 @@ export function usePhonkMusicViewModel(autoPlay: boolean = true): [PhonkMusicSta
     return () => {
       audio.removeEventListener('ended', handleEnded);
     };
-  }, [currentTrack, isPlaying, trackChangedProgrammatically]);
+  }, [currentTrack, isPlaying, trackChangedProgrammatically, autoPlayAttempted, tracks, nextTrack]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -252,24 +270,7 @@ export function usePhonkMusicViewModel(autoPlay: boolean = true): [PhonkMusicSta
     }
   };
 
-  const nextTrack = () => {
-    // Save current state of userPaused to avoid unintended auto-play
-    const wasPaused = userPaused;
-    
-    // Set this flag to true to indicate this was an intentional track change
-    setTrackChangedProgrammatically(true);
-    
-    // Change the track
-    setCurrentTrack((prev) => (prev + 1) % tracks.length);
-    
-    // Reset currentTime when changing tracks
-    currentTimeRef.current = 0;
-    
-    // Keep userPaused state across track changes
-    setUserPaused(wasPaused);
-  };
-
-  const previousTrack = () => {
+  const previousTrack = useCallback(() => {
     // Save current state of userPaused to avoid unintended auto-play
     const wasPaused = userPaused;
     
@@ -284,7 +285,7 @@ export function usePhonkMusicViewModel(autoPlay: boolean = true): [PhonkMusicSta
     
     // Keep userPaused state across track changes
     setUserPaused(wasPaused);
-  };
+  }, [userPaused, tracks.length]);
 
   return [
     {
