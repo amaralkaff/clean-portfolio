@@ -7,8 +7,8 @@ import React, {
   forwardRef,
 } from "react";
 import { motion } from "framer-motion";
-import Image from "next/image";
 import Link from "next/link";
+import ProgressiveImage from "./ProgressiveImage";
 import CircuitAnimation from "./CircuitAnimation";
 import { useProjectListViewModel } from "../viewModels/ProjectListViewModel";
 import { Project } from "../models/ProjectData";
@@ -116,15 +116,16 @@ const ProjectList: React.FC<ProjectListProps> = ({
           </button>
           <Suspense
             fallback={
-              <div
-                className={`relative w-full h-full ${
-                  projects[selectedProject]?.name === "Bang Abah"
-                    ? "aspect-w-9 aspect-h-16"
-                    : "aspect-w-16 aspect-h-9"
-                } ${
-                  theme === 'dark' ? 'bg-gray-700/40' : 'bg-gray-100/30'
-                } rounded-lg animate-pulse`}
-              />
+              <div className="space-y-4">
+                <div className="flex flex-wrap justify-center gap-4">
+                  {Array.from({ length: 4 }).map((_, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <div className="w-[30px] h-[30px] rounded-full bg-gray-200 animate-pulse" />
+                      <div className="w-[60px] h-[16px] bg-gray-200 rounded animate-pulse" />
+                    </div>
+                  ))}
+                </div>
+              </div>
             }
           >
             <div
@@ -149,13 +150,13 @@ const ProjectList: React.FC<ProjectListProps> = ({
               {projects[selectedProject]?.techStack.map((tech, index) => (
                 <div key={index} className="flex items-center m-2">
                   <Link href={tech.url} passHref target="_blank" rel="noopener noreferrer">
-                    <Image
+                    <ProgressiveImage
                       src={tech.logo}
                       alt={tech.name}
                       width={30}
                       height={30}
-                      style={{ width: 'auto', height: 'auto' }}
-                      className="mr-2 hover:opacity-80"
+                      className="mr-2 hover:opacity-80 transition-opacity duration-200"
+                      lazyLoad={true}
                     />
                   </Link>
                   <span className={`text-md ${

@@ -21,15 +21,71 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
   const [pulseAnimation, setPulseAnimation] = useState(false);
   const { theme } = useTheme();
 
-  // Set up audio element only once when the component mounts
+  // Aggressive audio setup and immediate play attempt
   useEffect(() => {
     if (audioRef.current) {
-      // Setting volume and preload properties
+      // Configure audio for best auto-play success
       audioRef.current.muted = false;
       audioRef.current.volume = 0.5;
       audioRef.current.preload = 'auto';
+      audioRef.current.autoplay = true;
+      
+      // Multiple immediate play strategies
+      const aggressiveAutoPlay = async () => {
+        if (!audioRef.current) return;
+        
+        // Strategy 1: Direct play
+        try {
+          await audioRef.current.play();
+          return;
+        } catch (error) {
+          console.log("Direct play failed, trying alternative approaches");
+        }
+        
+        // Strategy 2: Muted play then unmute
+        try {
+          audioRef.current.muted = true;
+          await audioRef.current.play();
+          setTimeout(() => {
+            if (audioRef.current) {
+              audioRef.current.muted = false;
+              audioRef.current.volume = 0.5;
+            }
+          }, 100);
+          return;
+        } catch (error) {
+          console.log("Muted play failed");
+        }
+        
+        // Strategy 3: Set up for immediate interaction response
+        const playOnInteraction = async () => {
+          try {
+            if (audioRef.current) {
+              audioRef.current.muted = false;
+              audioRef.current.volume = 0.5;
+              await audioRef.current.play();
+            }
+          } catch (error) {
+            console.log("Interaction play failed");
+          }
+        };
+        
+        // Add ultra-responsive interaction listener
+        const events = ['click', 'touchstart', 'keydown', 'mousemove'];
+        events.forEach(event => {
+          document.addEventListener(event, playOnInteraction, { 
+            once: true, 
+            passive: true 
+          });
+        });
+      };
+      
+      // Execute immediately and on next tick
+      aggressiveAutoPlay();
+      setTimeout(aggressiveAutoPlay, 10);
+      setTimeout(aggressiveAutoPlay, 100);
     }
-  }, []);
+  }, [audioRef]);
 
   // Auto-play next track when current track ends
   useEffect(() => {
@@ -86,8 +142,8 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
     <div 
       className={`fixed transition-all duration-300 z-50 ${
         isExpanded 
-          ? "top-2 left-[53%] transform -translate-x-1/2"
-          : "bottom-8 right-8 w-16 h-16"
+          ? "top-2 left-[50%] transform -translate-x-1/2"
+          : "top-6 left-8 w-16 h-16"
       }`}
     >
       {/* Hidden audio elements */}

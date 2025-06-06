@@ -1,6 +1,7 @@
 // components/LocalVideo.tsx
 import React, { forwardRef, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
+import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 
 const LottieLoader = dynamic(() => import('./CustomLottie'), {
   ssr: false,
@@ -21,6 +22,7 @@ interface LocalVideoProps {
   poster?: string;
   preload?: "none" | "metadata" | "auto";
   lowResSrc?: string;
+  lazyLoad?: boolean;
 }
 
 const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
@@ -34,13 +36,26 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
     poster = '',
     preload = "auto",
     lowResSrc,
+    lazyLoad = true,
   }, ref) => {
     const [isLoading, setIsLoading] = useState(true);
     const [hasError, setHasError] = useState(false);
+    const [shouldLoad, setShouldLoad] = useState(!lazyLoad);
+    const { targetRef, isIntersecting, hasIntersected } = useIntersectionObserver({
+      rootMargin: '200px',
+      threshold: 0.1,
+    });
+
+    // Update shouldLoad when intersection occurs
+    useEffect(() => {
+      if (lazyLoad && (isIntersecting || hasIntersected)) {
+        setShouldLoad(true);
+      }
+    }, [isIntersecting, hasIntersected, lazyLoad]);
 
     useEffect(() => {
       const videoElement = (ref as React.RefObject<HTMLVideoElement>)?.current;
-      if (!videoElement) return;
+      if (!videoElement || !shouldLoad) return;
 
       setIsLoading(true);
       setHasError(false);
@@ -73,10 +88,10 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
         videoElement.removeEventListener('loadeddata', handleLoadedData);
         videoElement.removeEventListener('error', handleError);
       };
-    }, [ref, src, autoplay]);
+    }, [ref, src, autoplay, shouldLoad]);
 
     return (
-      <div className="relative w-full h-full">
+      <div ref={targetRef as React.RefObject<HTMLDivElement>} className="relative w-full h-full">
         {/* Loading State */}
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center z-10">
@@ -108,22 +123,26 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
         )}
 
         {/* Video Element */}
-        <video
-          ref={ref}
-          key={src} // Force remount when src changes
-          src={lowResSrc || src}
-          autoPlay={autoplay}
-          loop={loop}
-          muted={muted}
-          controls={controls}
-          className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
-          poster={poster}
-          preload={preload}
-          playsInline
-          webkit-playsinline="true"
-        >
-          Your browser does not support the video tag.
-        </video>
+        {shouldLoad ? (
+          <video
+            ref={ref}
+            key={src} // Force remount when src changes
+            src={lowResSrc || src}
+            autoPlay={autoplay}
+            loop={loop}
+            muted={muted}
+            controls={controls}
+            className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+            poster={poster}
+            preload={lazyLoad ? "none" : preload}
+            playsInline
+            webkit-playsinline="true"
+          >
+            Your browser does not support the video tag.
+          </video>
+        ) : (
+          <div className={`${className} bg-gray-200 dark:bg-gray-700 animate-pulse rounded-lg`} />
+        )}
       </div>
     );
   }

@@ -30,7 +30,6 @@ export function usePhonkMusicViewModel(autoPlay: boolean = true): [PhonkMusicSta
   const [currentTrack, setCurrentTrack] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [hasInteracted, setHasInteracted] = useState(false);
   const [mutedAutoPlayStarted, setMutedAutoPlayStarted] = useState(false);
   // Track if user manually stopped the music
   const [userPaused, setUserPaused] = useState(false);
@@ -42,7 +41,6 @@ export function usePhonkMusicViewModel(autoPlay: boolean = true): [PhonkMusicSta
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const nextAudioRef = useRef<HTMLAudioElement | null>(null);
   const silentAudioRef = useRef<HTMLAudioElement | null>(null);
-  const autoPlayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const currentTimeRef = useRef<number>(0);
 
   const tracks: MusicTrack[] = [
@@ -55,41 +53,28 @@ export function usePhonkMusicViewModel(autoPlay: boolean = true): [PhonkMusicSta
     { path: '/music/LDRR.mp3', name: 'LDRR' },
   ];
 
-  // Create a silent audio element to bypass browser restrictions - only once when component mounts
+  // Simple autoplay attempt once on load
   useEffect(() => {
-    // Create a silent audio element (this can often auto-play when muted)
-    const silentAudio = new Audio();
-    silentAudio.src = tracks[currentTrack].path;
-    silentAudio.muted = true;
-    silentAudio.loop = true;
-    silentAudioRef.current = silentAudio;
-
-    // Try to play the silent audio
-    const playSilent = async () => {
+    if (!autoPlay || autoPlayAttempted || isLoading) return;
+    
+    setAutoPlayAttempted(true);
+    
+    const tryAutoPlay = async () => {
       try {
-        await silentAudio.play();
-        setMutedAutoPlayStarted(true);
-        
-        // After muted auto-play succeeds, try to unmute and play the real audio
-        setTimeout(forceUnmutedPlayback, 500);
+        if (audioRef.current) {
+          audioRef.current.volume = 0.5;
+          audioRef.current.muted = false;
+          await audioRef.current.play();
+          setIsPlaying(true);
+        }
       } catch (error) {
-        console.log("Silent auto-play failed, will try on user interaction");
+        // Autoplay failed - wait for user interaction
+        console.log("Autoplay blocked by browser - waiting for user interaction");
       }
     };
 
-    // Start silent playback immediately but only once
-    if (autoPlay && !userPaused && !autoPlayAttempted) {
-      setAutoPlayAttempted(true); // Mark as attempted
-      playSilent();
-    }
-
-    return () => {
-      if (silentAudioRef.current) {
-        silentAudioRef.current.pause();
-        silentAudioRef.current = null;
-      }
-    };
-  }, []); // Empty dependency array means this only runs once
+    tryAutoPlay();
+  }, [autoPlay, autoPlayAttempted, isLoading, audioRef]);
 
   // Force unmuted playback after silent play succeeds
   const forceUnmutedPlayback = async () => {
@@ -100,7 +85,7 @@ export function usePhonkMusicViewModel(autoPlay: boolean = true): [PhonkMusicSta
       if (audioRef.current) {
         // Make sure it's not muted
         audioRef.current.muted = false;
-        audioRef.current.volume = 0.7;
+        audioRef.current.volume = 0.5;
         await audioRef.current.play();
         setIsPlaying(true);
       }
@@ -118,75 +103,33 @@ export function usePhonkMusicViewModel(autoPlay: boolean = true): [PhonkMusicSta
     }
   }, [currentTrack]);
 
-  // Try to auto-play only on initial component mount
-  useEffect(() => {
-    // Only try auto-play once when the audio is first loaded
-    if (!isLoading && autoPlay && !isPlaying && !userPaused && !autoPlayAttempted) {
-      setAutoPlayAttempted(true); // Mark that we've tried
-      
-      // Just attempt once instead of intervals
-      const attemptPlay = async () => {
-        try {
-          if (audioRef.current) {
-            audioRef.current.muted = false; 
-            audioRef.current.volume = 0.7;
-            await audioRef.current.play();
-            setIsPlaying(true);
-          }
-        } catch (error) {
-          console.log('Initial auto-play attempt failed');
-        }
-      };
-      
-      attemptPlay();
-    }
-  }, [isLoading, autoPlay, isPlaying, userPaused, autoPlayAttempted]);
 
-  // For auto-play when site loads - user interaction method (once only)
+  // Single user interaction handler for autoplay
   useEffect(() => {
-    // Only set up once and only if not already played
-    if (hasInteracted || !autoPlay || isPlaying || userPaused || autoPlayAttempted) {
-      return; // Skip if already handled
-    }
+    if (!autoPlay || isPlaying || autoPlayAttempted) return;
     
-    // Try to play on first user interaction only
-    const handleUserInteraction = async () => {
-      setHasInteracted(true);
-      setAutoPlayAttempted(true);
-      
+    const handleFirstInteraction = async () => {
       try {
-        if (audioRef.current && !isPlaying && !userPaused) {
-          audioRef.current.muted = false;
-          audioRef.current.volume = 0.7;
+        if (audioRef.current && !isPlaying) {
           await audioRef.current.play();
           setIsPlaying(true);
+          setUserPaused(false);
         }
       } catch (error) {
-        console.log("Play failed even after user interaction");
+        console.log("Play failed after user interaction");
       }
-      
-      // Remove all listeners after first interaction
-      cleanupListeners();
     };
 
-    // Multiple event types to catch any user interaction
-    const interactionEvents = [
-      'click', 'touchstart', 'touchend', 'mousedown', 
-      'keydown', 'scroll', 'mousemove'
-    ];
-    
-    interactionEvents.forEach(event => {
-      document.addEventListener(event, handleUserInteraction, { once: true });
+    // Simple click handler only
+    document.addEventListener('click', handleFirstInteraction, { 
+      once: true, 
+      passive: true 
     });
 
-    const cleanupListeners = () => {
-      interactionEvents.forEach(event => {
-        document.removeEventListener(event, handleUserInteraction);
-      });
+    return () => {
+      document.removeEventListener('click', handleFirstInteraction);
     };
-
-    return cleanupListeners;
-  }, [autoPlay, hasInteracted, isPlaying, userPaused, autoPlayAttempted]);
+  }, [autoPlay, isPlaying, autoPlayAttempted, audioRef]);
 
   // Save current time position when audio is paused
   useEffect(() => {

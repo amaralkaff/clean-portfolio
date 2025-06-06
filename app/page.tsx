@@ -23,20 +23,54 @@ const Home = () => {
   const { setModalVisible } = actions;
   const { theme } = useTheme();
 
-  // This effect helps enable auto-play by adding a page-level click handler
+  // Immediate audio enablement on page load
   useEffect(() => {
-    // Add a one-time click handler to the entire document
-    // This helps with browser auto-play policies
-    const enableAudio = () => {
-      // This click will trigger the audio to play
-      // through the event listeners in PhonkMusicViewModel
-      document.removeEventListener('click', enableAudio);
+    // Try to enable audio context immediately
+    const enableAudioContext = async () => {
+      try {
+        // Create a silent audio context to bypass restrictions
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        if (audioContext.state === 'suspended') {
+          await audioContext.resume();
+        }
+        
+        // Try to play a silent audio to unlock audio playback
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        gainNode.gain.value = 0;
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.01);
+        
+        console.log("Audio context enabled successfully");
+      } catch (error) {
+        console.log("Audio context enablement failed");
+      }
     };
     
-    document.addEventListener('click', enableAudio, { once: true });
+    // Execute immediately
+    enableAudioContext();
+    
+    // Also set up ultra-responsive interaction handler
+    const immediateAudioEnable = () => {
+      enableAudioContext();
+    };
+    
+    // Multiple event types for maximum coverage
+    const events = ['click', 'touchstart', 'keydown', 'mousemove', 'scroll'];
+    events.forEach(event => {
+      document.addEventListener(event, immediateAudioEnable, { 
+        once: true, 
+        passive: true,
+        capture: true
+      });
+    });
     
     return () => {
-      document.removeEventListener('click', enableAudio);
+      events.forEach(event => {
+        document.removeEventListener(event, immediateAudioEnable);
+      });
     };
   }, []);
 
