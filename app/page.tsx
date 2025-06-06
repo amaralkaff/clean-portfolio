@@ -7,8 +7,7 @@ import { useTheme } from "./context/ThemeContext";
 import dynamic from "next/dynamic";
 
 const LottieLoader = dynamic(() => import("./components/CustomLottie"), { 
-  ssr: false,
-  loading: () => <div className="w-full h-screen flex items-center justify-center">Loading...</div>
+  ssr: false
 });
 const MainContent = dynamic(() => import("./components/MainContent"), {
   ssr: false
