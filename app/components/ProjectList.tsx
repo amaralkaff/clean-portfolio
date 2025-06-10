@@ -39,7 +39,10 @@ const ProjectList: React.FC<ProjectListProps> = ({
   return (
     <div
       className="relative flex flex-col w-full h-screen items-center px-4 overflow-auto justify-center md:w-2/3 min-h-screen"
-      onMouseLeave={() => setIsActive(false)}
+      onMouseLeave={() => {
+        setIsActive(false);
+        closeModal();
+      }}
     >
       <CircuitAnimation 
         isActive={selectedProject !== null} 
@@ -59,19 +62,19 @@ const ProjectList: React.FC<ProjectListProps> = ({
             animate="visible"
             variants={fadeUpVariant}
             transition={{ duration: 0.3, delay: index * 0.1 }}
-            whileHover={{ scale: 1.03 }}
+            whileHover={{ scale: 1.0 }}
             onMouseEnter={() => !isMobile && handleInteraction(index)}
             onClick={() => isMobile && handleInteraction(index)}
-            className={`flex justify-between items-center w-full p-4 rounded-lg cursor-default ${
+            className={`relative flex justify-between items-center w-full p-4 rounded-xl cursor-default bg-transparent transition-all duration-300 ease-out group overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-100 after:absolute after:inset-0 after:bg-gradient-to-r after:translate-x-[-100%] after:skew-x-12 after:transition-transform after:duration-700 hover:after:translate-x-[100%] after:pointer-events-none ${
               theme === 'dark' 
-                ? 'bg-gray-800/40 hover:bg-gray-700/60 backdrop-blur-sm' 
-                : 'bg-transparent hover:bg-gray-100/50'
+                ? 'hover:bg-white/[0.02] border border-transparent hover:border-white/20 hover:backdrop-blur-xl hover:shadow-[0_4px_16px_rgba(255,255,255,0.1)] before:from-white/[0.03] before:via-white/[0.01] before:to-transparent after:from-transparent after:via-white/10 after:to-transparent' 
+                : 'hover:bg-white/[0.15] border border-transparent hover:border-gray/30 hover:backdrop-blur-xl hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] before:from-gray/[0.08] before:via-gray/[0.03] before:to-transparent after:from-transparent after:via-black/15 after:to-transparent'
             }`}
           >
-            <span className="text-[var(--text-primary)] text-md font-medium w-1/2 truncate">
+            <span className="relative z-10 text-[var(--text-primary)] text-md font-medium w-1/2 truncate transition-all duration-300 group-hover:text-opacity-90 group-hover:drop-shadow-sm">
               {project.name}
             </span>
-            <span className="text-gray-400 text-sm md:text-base w-1/4 text-right">
+            <span className="relative z-10 text-gray-400 text-sm md:text-base w-1/4 text-right transition-all duration-300 group-hover:text-opacity-80 group-hover:drop-shadow-sm">
               {project.year}
             </span>
           </motion.div>
@@ -81,21 +84,26 @@ const ProjectList: React.FC<ProjectListProps> = ({
       {selectedProject !== null && (
         <motion.div
           ref={modalRef}
-          className={`fixed w-full md:w-2/5 lg:w-2/4 h-auto rounded-lg flex flex-col justify-center items-center transition-all duration-300 md:right-12 p-4 z-20 ${
+          className={`fixed w-full md:w-2/5 lg:w-2/4 h-auto rounded-2xl flex flex-col justify-center items-center transition-all duration-500 md:right-12 p-6 z-20 overflow-hidden ${
             theme === 'dark' 
-              ? 'bg-gray-800/70 backdrop-blur-sm border border-gray-700' 
-              : 'bg-transparent backdrop-blur-sm border border-gray-200'
+              ? 'bg-black/10 backdrop-blur-2xl border border-white/20 shadow-[0_20px_60px_rgba(255,255,255,0.1),inset_0_1px_0_rgba(255,255,255,0.2)]' 
+              : 'bg-white/10 backdrop-blur-2xl border border-black/20 shadow-[0_20px_60px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.5)]'
           } ${
-            isMobile ? "inset-0 bg-black bg-opacity-50" : ""
+            isMobile ? "inset-0 bg-black/20 backdrop-blur-lg" : ""
+          } before:absolute before:inset-0 before:bg-gradient-to-br before:opacity-30 ${
+            theme === 'dark' 
+              ? 'before:from-white/5 before:via-transparent before:to-white/10' 
+              : 'before:from-white/20 before:via-transparent before:to-black/5'
           }`}
           variants={fadeUpVariant}
           transition={{ duration: 0.5 }}
+          onMouseLeave={closeModal}
         >
           <button
-            className={`fixed top-12 md:top-3 right-3 rounded-full p-2 z-50 md:hidden ${
-              theme === 'dark'
-                ? 'bg-gray-700/70 text-gray-300 hover:text-white'
-                : 'text-black bg-gray-200/70 hover:bg-gray-300/70'
+            className={`fixed top-16 md:top-6 right-3 rounded-full p-2 z-50 md:hidden transition-all duration-300 backdrop-blur-lg border ${
+              theme === 'dark' 
+                ? 'bg-black/20 hover:bg-black/30 border-white/20 text-gray-300 hover:text-white shadow-[0_4px_16px_rgba(255,255,255,0.1)]' 
+                : 'bg-white/20 hover:bg-white/30 border-black/20 text-black hover:text-gray-800 shadow-[0_4px_16px_rgba(0,0,0,0.1)]'
             }`}
             onClick={closeModal}
           >
@@ -133,7 +141,13 @@ const ProjectList: React.FC<ProjectListProps> = ({
                 projects[selectedProject]?.name === "Bang Abah"
                   ? "aspect-w-9 aspect-h-16"
                   : "aspect-w-16 aspect-h-9"
-              } w-full`}
+              } w-full rounded-2xl overflow-hidden bg-gradient-to-br ${
+                theme === 'dark' 
+                  ? 'from-white/5 to-white/10' 
+                  : 'from-black/5 to-black/10'
+              } backdrop-blur-sm border ${
+                theme === 'dark' ? 'border-white/20' : 'border-black/20'
+              } shadow-[0_8px_32px_rgba(0,0,0,0.2)] before:absolute before:inset-0 before:bg-gradient-to-t before:from-transparent before:via-transparent before:to-white/10 before:pointer-events-none before:z-10`}
             >
               <LocalVideo
                 ref={videoRef}
@@ -142,7 +156,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
                 controls={false}
                 muted={true}
                 loop={true}
-                className="w-full h-full rounded-lg object-cover"
+                className="w-full h-full rounded-2xl object-cover relative z-0"
                 preload="auto"
               />
             </div>

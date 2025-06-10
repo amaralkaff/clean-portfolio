@@ -91,15 +91,7 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
     }, [ref, src, autoplay, shouldLoad]);
 
     return (
-      <div ref={targetRef as React.RefObject<HTMLDivElement>} className="liquid-glass-modal relative w-full h-full bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-lg backdrop-saturate-150 border border-white/20 rounded-2xl overflow-hidden shadow-xl shadow-black/5">
-        {/* Loading State */}
-        {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center z-10 bg-gradient-to-br from-white/20 via-white/10 to-white/5 backdrop-blur-xl rounded-2xl">
-            <div className="bg-white/10 backdrop-blur-md rounded-full p-6 border border-white/20">
-              <LottieLoader />
-            </div>
-          </div>
-        )}
+      <div ref={targetRef as React.RefObject<HTMLDivElement>} className="relative w-full h-full">
 
         {/* Error State */}
         {hasError && !isLoading && (
@@ -134,7 +126,7 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
             loop={loop}
             muted={muted}
             controls={controls}
-            className={`${className} ${isLoading ? 'opacity-0 scale-95' : 'opacity-100 scale-100'} transition-all duration-500 ease-out rounded-2xl`}
+            className={`${className} rounded-2xl`}
             poster={poster}
             preload={lazyLoad ? "none" : preload}
             playsInline
@@ -143,7 +135,7 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
             Your browser does not support the video tag.
           </video>
         ) : (
-          <div className={`${className} bg-gradient-to-br from-white/20 via-white/10 to-white/5 backdrop-blur-md border border-white/20 animate-pulse rounded-2xl`} />
+          <div className={`${className}`} />
         )}
       </div>
     );

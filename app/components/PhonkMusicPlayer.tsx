@@ -17,6 +17,7 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
   const { togglePlay, nextTrack, audioRef, nextAudioRef } = actions;
   const initCompleteRef = useRef(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const [visualizerBars, setVisualizerBars] = useState([0.3, 0.8, 0.5]);
   const [pulseAnimation, setPulseAnimation] = useState(false);
   const { theme } = useTheme();
@@ -130,20 +131,34 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
   }, [isExpanded]);
 
   const toggleExpanded = () => {
+    setIsTransitioning(true);
     setIsExpanded(!isExpanded);
+    
+    // Smooth transition timing
+    setTimeout(() => {
+      setIsTransitioning(false);
+    }, 450);
+    
     // Start playing music when expanded if currently paused
     if (!isExpanded && !isPlaying && !isLoading) {
-      togglePlay();
+      setTimeout(() => {
+        togglePlay();
+      }, 300);
     }
   };
 
   return (
     <div 
-      className={`fixed transition-all duration-300 z-50 ${
+      className={`fixed transition-all duration-500 ease-in-out z-50 transform ${
         isExpanded 
-          ? "top-2 left-[50%] transform -translate-x-1/2"
-          : "top-6 left-8 w-16 h-16"
-      }`}
+          ? "top-2 left-[50%] -translate-x-1/2 scale-100"
+          : "top-6 left-8 w-16 h-16 scale-100"
+      } ${isTransitioning ? 'will-change-transform' : ''}`}
+      style={{ 
+        transformOrigin: isExpanded ? 'center top' : 'left top',
+        backfaceVisibility: 'hidden',
+        perspective: '1000px'
+      }}
     >
       {/* Hidden audio elements */}
       <audio ref={audioRef} preload="auto" muted={false} loop={false} />
@@ -151,11 +166,11 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
       
       {isExpanded ? (
         // Expanded player
-        <div className="bg-gray bg-opacity-80 backdrop-blur-sm px-4 py-2 rounded-full flex items-center space-x-4 transition-all duration-300 hover:bg-opacity-100">
+        <div className={`px-4 py-2 rounded-lg flex items-center space-x-4 transition-all duration-500 ease-out transform backdrop-blur-md ${isTransitioning ? 'will-change-transform scale-105' : 'scale-100'}`}>
           <button 
             onClick={togglePlay}
             disabled={isLoading} 
-            className={`focus:outline-none transition-transform duration-200 ease-in-out transform hover:scale-110 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`focus:outline-none transition-all duration-300 ease-out transform hover:scale-110 active:scale-95 ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:rotate-12'}`}
           >
             {isPlaying ? <Pause size={18} className={theme === 'dark' ? 'text-white' : ''} /> : <Play size={18} className={theme === 'dark' ? 'text-white' : ''} />}
           </button>
@@ -164,9 +179,9 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
             <div className={`text-xs font-medium truncate text-center w-full ${theme === 'dark' ? 'text-white' : ''}`}>
               {isLoading ? 'Loading...' : error || tracks[currentTrack].name}
             </div>
-            <div className="w-full h-1 bg-gray-200 rounded-full mt-1 overflow-hidden">
+            <div className={`w-full h-1 rounded-full mt-1 overflow-hidden backdrop-blur-sm ${theme === 'dark' ? 'bg-white/20' : 'bg-black/20'}`}>
               <div 
-                className="h-full bg-black rounded-full transition-all duration-300 ease-out"
+                className={`h-full rounded-full transition-all duration-500 ease-out bg-gradient-to-r ${theme === 'dark' ? 'from-blue-400 via-purple-400 to-pink-400' : 'from-blue-600 via-purple-600 to-pink-600'} shadow-sm`}
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -175,14 +190,14 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
           <button 
             onClick={nextTrack}
             disabled={isLoading} 
-            className={`focus:outline-none transition-transform duration-200 ease-in-out transform hover:scale-110 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`focus:outline-none transition-all duration-300 ease-out transform hover:scale-110 active:scale-95 ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:translate-x-1'}`}
           >
             <SkipForward size={18} className={theme === 'dark' ? 'text-white' : ''} />
           </button>
           
           <button 
             onClick={toggleExpanded} 
-            className={`focus:outline-none transition-transform duration-200 ease-in-out transform hover:scale-110 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`focus:outline-none transition-all duration-300 ease-out transform hover:scale-110 active:scale-95 ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:-rotate-12'}`}
           >
             <Minimize2 size={18} className={theme === 'dark' ? 'text-white' : ''} />
           </button>
@@ -191,11 +206,11 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
         // Collapsed player
         <div 
           onClick={toggleExpanded} 
-          className={`bg-gray bg-opacity-80 backdrop-blur-sm rounded-lg w-full h-full flex items-center justify-center cursor-pointer hover:bg-opacity-100 transition-all duration-500 relative overflow-hidden shadow-lg hover:shadow-xl ${pulseAnimation ? 'scale-105' : 'scale-100'}`}
+          className={`rounded-lg w-full h-full flex items-center justify-center cursor-pointer transition-all duration-500 ease-out relative overflow-hidden transform backdrop-blur-md ${pulseAnimation ? 'scale-105' : 'scale-100'} ${isTransitioning ? 'will-change-transform rotate-1' : 'rotate-0'}`}
         >
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gray-200 overflow-hidden">
+          <div className={`absolute top-0 left-0 right-0 h-1 overflow-hidden backdrop-blur-sm ${theme === 'dark' ? 'bg-white/20' : 'bg-black/20'}`}>
             <div 
-              className={`h-full ${theme === 'dark' ? 'bg-white' : 'bg-black'} transition-all duration-300 ease-out`}
+              className={`h-full transition-all duration-500 ease-out bg-gradient-to-r ${theme === 'dark' ? 'from-blue-400 via-purple-400 to-pink-400' : 'from-blue-600 via-purple-600 to-pink-600'} shadow-sm`}
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -203,16 +218,25 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
           <div className="flex flex-col items-center justify-center">
             <div className="flex items-center justify-center h-6 space-x-0.5 mb-1">
               <div 
-                className={`w-1 ${theme === 'dark' ? 'bg-white' : 'bg-black'} rounded-sm transition-all duration-300`}
-                style={{ height: isPlaying ? `${visualizerBars[0] * 24}px` : '16px' }}
+                className={`w-1 rounded-sm transition-all duration-700 ease-out ${theme === 'dark' ? 'bg-gradient-to-t from-blue-400 to-purple-400' : 'bg-gradient-to-t from-blue-600 to-purple-600'} shadow-sm transform ${isTransitioning ? 'scale-y-125' : 'scale-y-100'}`}
+                style={{ 
+                  height: isPlaying ? `${visualizerBars[0] * 24}px` : '16px',
+                  transformOrigin: 'bottom'
+                }}
               ></div>
               <div 
-                className={`w-1 ${theme === 'dark' ? 'bg-white' : 'bg-black'} rounded-sm transition-all duration-300`}
-                style={{ height: isPlaying ? `${visualizerBars[1] * 24}px` : '10px' }}
+                className={`w-1 rounded-sm transition-all duration-700 ease-out ${theme === 'dark' ? 'bg-gradient-to-t from-purple-400 to-pink-400' : 'bg-gradient-to-t from-purple-600 to-pink-600'} shadow-sm transform ${isTransitioning ? 'scale-y-125' : 'scale-y-100'}`}
+                style={{ 
+                  height: isPlaying ? `${visualizerBars[1] * 24}px` : '10px',
+                  transformOrigin: 'bottom'
+                }}
               ></div>
               <div 
-                className={`w-1 ${theme === 'dark' ? 'bg-white' : 'bg-black'} rounded-sm transition-all duration-300`}
-                style={{ height: isPlaying ? `${visualizerBars[2] * 24}px` : '5px' }}
+                className={`w-1 rounded-sm transition-all duration-700 ease-out ${theme === 'dark' ? 'bg-gradient-to-t from-pink-400 to-blue-400' : 'bg-gradient-to-t from-pink-600 to-blue-600'} shadow-sm transform ${isTransitioning ? 'scale-y-125' : 'scale-y-100'}`}
+                style={{ 
+                  height: isPlaying ? `${visualizerBars[2] * 24}px` : '5px',
+                  transformOrigin: 'bottom'
+                }}
               ></div>
             </div>
             
@@ -222,7 +246,7 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
           </div>
           
           {/* Subtle glow effect */}
-          <div className={`absolute inset-0 ${theme === 'dark' ? 'bg-white' : 'bg-black'} opacity-0 hover:opacity-10 transition-opacity duration-300 rounded-lg ${pulseAnimation && !isPlaying ? `ring-2 ${theme === 'dark' ? 'ring-white' : 'ring-black'} ring-opacity-30` : ''}`}></div>
+          <div className={`absolute inset-0 bg-gradient-to-br opacity-0 hover:opacity-20 transition-opacity duration-700 rounded-lg ${theme === 'dark' ? 'from-blue-500/30 via-purple-500/30 to-pink-500/30' : 'from-blue-600/20 via-purple-600/20 to-pink-600/20'} ${pulseAnimation && !isPlaying ? `ring-2 ring-gradient-to-r ${theme === 'dark' ? 'ring-purple-400/40' : 'ring-purple-600/40'}` : ''}`}></div>
         </div>
       )}
     </div>
