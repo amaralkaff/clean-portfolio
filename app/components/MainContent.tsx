@@ -12,8 +12,20 @@ interface MainContentProps {
 }
 
 const fadeUpVariant = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 }
+  hidden: { 
+    opacity: 0, 
+    y: 30,
+    scale: 0.95,
+    rotateX: 10,
+    filter: "blur(4px)"
+  },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    scale: 1,
+    rotateX: 0,
+    filter: "blur(0px)"
+  }
 };
 
 const MainContent: React.FC<MainContentProps> = ({ isVisible }) => {
@@ -29,15 +41,34 @@ const MainContent: React.FC<MainContentProps> = ({ isVisible }) => {
         initial="hidden"
         animate={isVisible ? "visible" : "hidden"}
         variants={fadeUpVariant}
-        transition={{ duration: 0.1 }}
+        transition={{ 
+          type: "spring",
+          stiffness: 200,
+          damping: 25,
+          duration: 0.8,
+          opacity: { duration: 0.6 },
+          scale: { duration: 0.7 },
+          rotateX: { duration: 0.6 },
+          filter: { duration: 0.5 }
+        }}
       >
         <div className="text-center">
-          <div className="text-lg font-bold">
+          <motion.div 
+            className="text-lg font-bold"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+          >
             <span className="text-[var(--text-primary)]">{personalInfo.name}</span>
             <br />
             <span className="text-gray-600">{personalInfo.tagline}</span>
-          </div>
-          <div className="mt-2 space-x-4 text-gray-600">
+          </motion.div>
+          <motion.div 
+            className="mt-2 space-x-4 text-gray-600"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+          >
             {personalInfo.contactLinks.map((link, index) => (
               link.type === 'resume' ? (
                 <button
@@ -59,7 +90,7 @@ const MainContent: React.FC<MainContentProps> = ({ isVisible }) => {
                 </Link>
               )
             ))}
-          </div>
+          </motion.div>
         </div>
       </motion.div>
 

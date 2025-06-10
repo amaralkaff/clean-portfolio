@@ -91,20 +91,22 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
     }, [ref, src, autoplay, shouldLoad]);
 
     return (
-      <div ref={targetRef as React.RefObject<HTMLDivElement>} className="relative w-full h-full">
+      <div ref={targetRef as React.RefObject<HTMLDivElement>} className="liquid-glass-modal relative w-full h-full bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-lg backdrop-saturate-150 border border-white/20 rounded-2xl overflow-hidden shadow-xl shadow-black/5">
         {/* Loading State */}
         {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center z-10">
-            <LottieLoader />
+          <div className="absolute inset-0 flex items-center justify-center z-10 bg-gradient-to-br from-white/20 via-white/10 to-white/5 backdrop-blur-xl rounded-2xl">
+            <div className="bg-white/10 backdrop-blur-md rounded-full p-6 border border-white/20">
+              <LottieLoader />
+            </div>
           </div>
         )}
 
         {/* Error State */}
         {hasError && !isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[var(--bg-card)] rounded-lg">
-            <div className="text-center text-[var(--text-primary)]">
+          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-red-500/20 via-red-400/10 to-transparent backdrop-blur-xl rounded-2xl border border-red-300/20">
+            <div className="text-center text-white bg-gradient-to-br from-red-500/30 via-red-400/20 to-red-300/10 backdrop-blur-md rounded-xl p-6 border border-red-300/30">
               <svg 
-                className="mx-auto h-12 w-12 text-[var(--text-secondary)]"
+                className="mx-auto h-12 w-12 text-red-300 drop-shadow-lg"
                 xmlns="http://www.w3.org/2000/svg" 
                 fill="none" 
                 viewBox="0 0 24 24" 
@@ -117,7 +119,7 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
                   d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" 
                 />
               </svg>
-              <p className="mt-2 text-[var(--text-primary)]">Failed to load video</p>
+              <p className="mt-2 text-white drop-shadow-md">Failed to load video</p>
             </div>
           </div>
         )}
@@ -132,7 +134,7 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
             loop={loop}
             muted={muted}
             controls={controls}
-            className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+            className={`${className} ${isLoading ? 'opacity-0 scale-95' : 'opacity-100 scale-100'} transition-all duration-500 ease-out rounded-2xl`}
             poster={poster}
             preload={lazyLoad ? "none" : preload}
             playsInline
@@ -141,7 +143,7 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
             Your browser does not support the video tag.
           </video>
         ) : (
-          <div className={`${className} bg-gray-200 dark:bg-gray-700 animate-pulse rounded-lg`} />
+          <div className={`${className} bg-gradient-to-br from-white/20 via-white/10 to-white/5 backdrop-blur-md border border-white/20 animate-pulse rounded-2xl`} />
         )}
       </div>
     );

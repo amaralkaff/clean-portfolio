@@ -34,3 +34,56 @@ body {
     background-position: 0% 50%;
   }
 }
+
+/* Liquid Glass Modal Effects */
+@keyframes liquid-shimmer {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 100% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  75% {
+    background-position: 0% 100%;
+  }
+}
+
+@keyframes glass-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-2px) rotate(0.5deg);
+  }
+  66% {
+    transform: translateY(2px) rotate(-0.5deg);
+  }
+}
+
+.liquid-glass-modal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, 
+    rgba(255,255,255,0.1) 0%, 
+    rgba(255,255,255,0.05) 25%, 
+    rgba(255,255,255,0.15) 50%, 
+    rgba(255,255,255,0.05) 75%, 
+    rgba(255,255,255,0.1) 100%);
+  background-size: 400% 400%;
+  animation: liquid-shimmer 8s ease-in-out infinite;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.liquid-glass-modal {
+  animation: glass-float 6s ease-in-out infinite;
+  position: relative;
+}
