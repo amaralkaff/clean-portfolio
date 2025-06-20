@@ -3,7 +3,7 @@ import React, { forwardRef, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 
-const LottieLoader = dynamic(() => import('./CustomLottie'), {
+const AnimeLoader = dynamic(() => import('./AnimeLoader'), {
   ssr: false,
   loading: () => (
     <div className="flex items-center justify-center w-full h-full bg-[var(--bg-card)] rounded-lg animate-pulse">

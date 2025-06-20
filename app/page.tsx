@@ -1,12 +1,12 @@
 "use client";
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense, useEffect, useState, useRef } from "react";
 import { useAppViewModel } from "./viewModels/AppViewModel";
 import { useTheme } from "./context/ThemeContext";
 
 // Use next/dynamic instead of the import from 'next/dynamic'
 import dynamic from "next/dynamic";
 
-const LottieLoader = dynamic(() => import("./components/CustomLottie"), { 
+const AnimeLoader = dynamic(() => import("./components/AnimeLoader"), { 
   ssr: false
 });
 const MainContent = dynamic(() => import("./components/MainContent"), {
@@ -30,6 +30,19 @@ const Home = () => {
   const { modalVisible, isLoading } = state;
   const { setModalVisible } = actions;
   const { theme } = useTheme();
+  
+  // Track if hovering over the main app area
+  const [isHoveringApp, setIsHoveringApp] = useState(false);
+  const appFadeOutTimer = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (appFadeOutTimer.current) {
+        clearTimeout(appFadeOutTimer.current);
+      }
+    };
+  }, []);
 
   // Immediate audio enablement on page load
   useEffect(() => {
@@ -83,24 +96,40 @@ const Home = () => {
   }, []);
 
   if (isLoading) {
-    return <LottieLoader />;
+    return <AnimeLoader />;
   }
 
   return (
-    <div className="flex flex-col md:flex-row justify-center items-center min-h-screen pt-14 md:pt-0">
+    <div 
+      className="flex flex-col md:flex-row justify-center items-center min-h-screen pt-14 md:pt-0"
+      onMouseEnter={() => {
+        // Cancel any pending fade out when entering the app area
+        if (appFadeOutTimer.current) {
+          clearTimeout(appFadeOutTimer.current);
+          appFadeOutTimer.current = null;
+        }
+        setIsHoveringApp(true);
+      }}
+      onMouseLeave={() => {
+        // Add delay before deactivating circuit when leaving the entire app
+        appFadeOutTimer.current = setTimeout(() => {
+          setIsHoveringApp(false);
+        }, 1500); // 1.5 second delay when leaving the entire app area
+      }}
+    >
       <ThemeToggle />
       
-      <Suspense fallback={<LottieLoader />}>
+      <Suspense fallback={<AnimeLoader />}>
         <div
           className={`order-2 md:order-1 w-full md:w-1/2 h-screen overflow-auto transition-all duration-500 ${
             modalVisible ? "md:w-full" : ""
           }`}
         >
-          <ProjectList onModalToggle={setModalVisible} />
+          <ProjectList onModalToggle={setModalVisible} isAppHovered={isHoveringApp} />
         </div>
       </Suspense>
       
-      <Suspense fallback={<LottieLoader />}>
+      <Suspense fallback={<AnimeLoader />}>
         <div
           className={`order-1 md:order-2 w-full md:w-1/2 transition-all duration-500 ${
             modalVisible ? "hidden md:block" : ""

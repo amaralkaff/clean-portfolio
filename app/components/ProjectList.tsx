@@ -18,6 +18,7 @@ const LocalVideo = React.lazy(() => import("./LocalVideo"));
 
 interface ProjectListProps {
   onModalToggle: (isVisible: boolean) => void;
+  isAppHovered: boolean;
 }
 
 const fadeUpVariant = {
@@ -27,45 +28,74 @@ const fadeUpVariant = {
 
 const ProjectList: React.FC<ProjectListProps> = ({
   onModalToggle,
+  isAppHovered,
 }): ReactElement => {
   const modalRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const videoContainerRef = useRef<HTMLDivElement>(null);
+  const projectListRef = useRef<HTMLDivElement>(null);
+  const projectRefs = useRef<(HTMLDivElement | null)[]>([]);
   
   const [state, actions] = useProjectListViewModel(onModalToggle);
   const { selectedProject, isMobile, isActive, projects } = state;
   const { handleInteraction, closeModal, setIsActive } = actions;
   const { theme } = useTheme();
+  
+  // Track which project is being hovered
+  const [hoveredProjectIndex, setHoveredProjectIndex] = React.useState<number | null>(null);
+  // Track if hovering over project list area specifically
+  const [isHoveringProjectList, setIsHoveringProjectList] = React.useState<boolean>(false);
 
   return (
-    <div
-      className="relative flex flex-col w-full h-screen items-center px-4 overflow-auto justify-center md:w-2/3 min-h-screen"
-      onMouseLeave={() => {
-        setIsActive(false);
-        closeModal();
-      }}
-    >
+    <div className="relative flex flex-col w-full h-screen items-center px-4 overflow-auto justify-center md:w-2/3 min-h-screen">
       <CircuitAnimation 
-        isActive={selectedProject !== null} 
-        targetRef={modalRef as React.RefObject<HTMLElement>} 
+        isActive={(isAppHovered && isHoveringProjectList) || selectedProject !== null} 
+        targetRef={
+          selectedProject !== null ? 
+            videoContainerRef as React.RefObject<HTMLElement> :
+            hoveredProjectIndex !== null ? 
+              { current: projectRefs.current[hoveredProjectIndex] } as React.RefObject<HTMLElement> : 
+              projectListRef as React.RefObject<HTMLElement>
+        }
       />
       
       <div
-        className={`space-y-2 w-full cursor-none z-10 ${
+        ref={projectListRef}
+        className={`space-y-2 w-full z-10 ${
           isMobile && selectedProject !== null ? "hidden" : ""
         }`}
-        onMouseEnter={() => setIsActive(true)}
+        onMouseEnter={() => {
+          setIsActive(true);
+          setIsHoveringProjectList(true);
+        }}
+        onMouseLeave={() => {
+          setIsHoveringProjectList(false);
+        }}
       >
         {projects.map((project, index) => (
           <motion.div
             key={index}
+            ref={(el) => {
+              projectRefs.current[index] = el;
+            }}
             initial="hidden"
             animate="visible"
             variants={fadeUpVariant}
             transition={{ duration: 0.3, delay: index * 0.1 }}
             whileHover={{ scale: 1.0 }}
-            onMouseEnter={() => !isMobile && handleInteraction(index)}
+            onMouseEnter={() => {
+              if (!isMobile) {
+                setHoveredProjectIndex(index);
+                handleInteraction(index);
+              }
+            }}
+            onMouseLeave={() => {
+              if (!isMobile) {
+                setHoveredProjectIndex(null);
+              }
+            }}
             onClick={() => isMobile && handleInteraction(index)}
-            className={`relative flex justify-between items-center w-full p-4 rounded-xl cursor-default bg-transparent transition-all duration-300 ease-out group overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-100 after:absolute after:inset-0 after:bg-gradient-to-r after:translate-x-[-100%] after:skew-x-12 after:transition-transform after:duration-700 hover:after:translate-x-[100%] after:pointer-events-none ${
+            className={`relative flex justify-between items-center w-full p-4 rounded-xl cursor-pointer bg-transparent transition-all duration-300 ease-out group overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-100 after:absolute after:inset-0 after:bg-gradient-to-r after:translate-x-[-100%] after:skew-x-12 after:transition-transform after:duration-700 hover:after:translate-x-[100%] after:pointer-events-none ${
               theme === 'dark' 
                 ? 'hover:bg-white/[0.02] border border-transparent hover:border-white/20 hover:backdrop-blur-xl hover:shadow-[0_4px_16px_rgba(255,255,255,0.1)] before:from-white/[0.03] before:via-white/[0.01] before:to-transparent after:from-transparent after:via-white/10 after:to-transparent' 
                 : 'hover:bg-white/[0.15] border border-transparent hover:border-gray/30 hover:backdrop-blur-xl hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] before:from-gray/[0.08] before:via-gray/[0.03] before:to-transparent after:from-transparent after:via-black/15 after:to-transparent'
@@ -137,6 +167,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
             }
           >
             <div
+              ref={videoContainerRef}
               className={`relative ${
                 projects[selectedProject]?.name === "Bang Abah"
                   ? "aspect-w-9 aspect-h-16"
