@@ -4,6 +4,7 @@
   --bg-gradient-light-1: #ffff;
   --bg-gradient-light-2: #E5E7EB;
   --text-primary: #000000;
+  --text-secondary: #6B7280;
   --bg-card: #ffffff;
   --bg-card-hover: #f3f4f6;
 }
@@ -12,6 +13,7 @@
   --bg-gradient-light-1: #1a1a1a;
   --bg-gradient-light-2: #2d3748;
   --text-primary: #ffffff;
+  --text-secondary: #9CA3AF;
   --bg-card: #2d3748;
   --bg-card-hover: #4a5568;
 }
@@ -99,6 +101,12 @@ body {
   overflow: hidden;
   width: 100%;
   height: 100%;
+}
+
+/* Readability improvements */
+#creature-wrapper.readability-mode {
+  backdrop-filter: blur(0.5px);
+  opacity: 0.6;
 }
 
 #creature {

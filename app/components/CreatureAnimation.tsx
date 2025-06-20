@@ -1,17 +1,19 @@
 "use client";
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { animate, createTimeline, createTimer, stagger, utils } from 'animejs';
 
 interface CreatureAnimationProps {
   className?: string;
+  readabilityMode?: boolean;
 }
 
-const CreatureAnimation: React.FC<CreatureAnimationProps> = ({ className }) => {
+const CreatureAnimation: React.FC<CreatureAnimationProps> = ({ className, readabilityMode = true }) => {
   const creatureRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
+  const [isHoveringText, setIsHoveringText] = useState(false);
 
   useEffect(() => {
     if (!creatureRef.current || !wrapperRef.current) return;
@@ -23,7 +25,7 @@ const CreatureAnimation: React.FC<CreatureAnimationProps> = ({ className }) => {
     const grid = [rows, rows];
     const from = 'center';
     const scaleStagger = stagger([2, 5], { ease: 'inQuad', grid, from });
-    const opacityStagger = stagger([1, .1], { grid, from });
+    const opacityStagger = stagger([1, .1], { grid, from }); // Keep original opacity values
 
     // Clear existing children
     creatureEl.innerHTML = '';
@@ -142,13 +144,78 @@ const CreatureAnimation: React.FC<CreatureAnimationProps> = ({ className }) => {
       autoMove.pause();
       manualMovementTimeout.pause();
     };
-  }, [theme]);
+  }, [theme]); // Remove readabilityMode and isHoveringText dependencies to prevent resets
+
+  // Separate effect for smooth opacity transitions without resetting the animation
+  useEffect(() => {
+    if (!creatureRef.current || !readabilityMode) return;
+
+    const particleEls = creatureRef.current.querySelectorAll('div');
+    if (particleEls.length === 0) return;
+
+    // Smoothly animate opacity changes without disrupting the main animation
+    const grid = [13, 13];
+    const from = 'center';
+    const originalOpacityStagger = stagger([1, .1], { grid, from });
+    
+    animate(particleEls, {
+      opacity: (el: any, i: number) => {
+        const originalOpacity = typeof originalOpacityStagger === 'function' 
+          ? originalOpacityStagger(el, i) 
+          : originalOpacityStagger;
+        const opacity = typeof originalOpacity === 'number' ? originalOpacity : 1;
+        return isHoveringText ? opacity * 0.3 : opacity;
+      },
+      duration: 300,
+      ease: 'easeInOutQuad',
+    });
+  }, [isHoveringText, readabilityMode]);
+
+  // Detect when mouse cursor is hovering over text elements
+  useEffect(() => {
+    if (!readabilityMode) return;
+
+    const handleMouseOver = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      
+      // Check if the target or any parent is a text element
+      const isTextElement = target.closest('[data-text-content], .text-center, h1, h2, h3, p, span, a, button') !== null;
+      
+      // Also check if the element has text content
+      const hasTextContent = target.textContent && target.textContent.trim().length > 0;
+      
+      setIsHoveringText(Boolean(isTextElement && hasTextContent));
+    };
+
+    const handleMouseOut = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      const relatedTarget = event.relatedTarget as HTMLElement;
+      
+      // Only set to false if we're not moving to another text element
+      if (!relatedTarget || !relatedTarget.closest('[data-text-content], .text-center, h1, h2, h3, p, span, a, button')) {
+        setIsHoveringText(false);
+      }
+    };
+
+    // Add global mouse event listeners
+    document.addEventListener('mouseover', handleMouseOver);
+    document.addEventListener('mouseout', handleMouseOut);
+    
+    // Also listen for mouse leave on the document to ensure we reset
+    document.addEventListener('mouseleave', () => setIsHoveringText(false));
+
+    return () => {
+      document.removeEventListener('mouseover', handleMouseOver);
+      document.removeEventListener('mouseout', handleMouseOut);
+      document.removeEventListener('mouseleave', () => setIsHoveringText(false));
+    };
+  }, [readabilityMode]);
 
   return (
     <div 
       ref={wrapperRef}
       id="creature-wrapper"
-      className={`fixed inset-0 pointer-events-none z-0 ${className}`}
+      className={`fixed inset-0 pointer-events-none z-0 transition-all duration-300 ease-out ${className}`}
       style={{
         display: 'flex',
         justifyContent: 'center',
@@ -156,6 +223,8 @@ const CreatureAnimation: React.FC<CreatureAnimationProps> = ({ className }) => {
         overflow: 'hidden',
         width: '100%',
         height: '100%',
+        filter: readabilityMode && isHoveringText ? 'blur(0.5px)' : 'none',
+        transform: readabilityMode && isHoveringText ? 'scale(0.98)' : 'scale(1)',
       }}
     >
       <div 

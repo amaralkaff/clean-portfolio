@@ -7,7 +7,7 @@ const CreatureAnimation = dynamic(() => import('./CreatureAnimation'), {
 });
 
 const CreatureAnimationWrapper: React.FC = () => {
-  return <CreatureAnimation />;
+  return <CreatureAnimation readabilityMode={true} />;
 };
 
 export default CreatureAnimationWrapper;

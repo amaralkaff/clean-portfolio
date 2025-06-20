@@ -52,7 +52,7 @@ const MainContent: React.FC<MainContentProps> = ({ isVisible }) => {
           filter: { duration: 0.5 }
         }}
       >
-        <div className="text-center">
+        <div className="text-center" data-text-content style={{ textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
           <motion.div 
             className="text-lg font-bold"
             initial={{ opacity: 0, y: 20 }}
@@ -61,10 +61,10 @@ const MainContent: React.FC<MainContentProps> = ({ isVisible }) => {
           >
             <span className="text-[var(--text-primary)]">{personalInfo.name}</span>
             <br />
-            <span className="text-gray-600">{personalInfo.tagline}</span>
+            <span className="text-[var(--text-secondary)]">{personalInfo.tagline}</span>
           </motion.div>
           <motion.div 
-            className="mt-2 space-x-4 text-gray-600"
+            className="mt-2 space-x-4 text-[var(--text-secondary)]"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4, duration: 0.6 }}
@@ -74,7 +74,19 @@ const MainContent: React.FC<MainContentProps> = ({ isVisible }) => {
                 <button
                   key={index}
                   onClick={handleResumeClick}
-                  className="hover:underline cursor-pointer"
+                  className={`hover:underline cursor-pointer hover:text-[var(--text-primary)] hover:brightness-125 transition-all duration-200`}
+                  style={{ 
+                    textShadow: "0 0 8px transparent",
+                    color: `var(--text-secondary)` 
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.textShadow = `0 0 8px var(--text-primary)`;
+                    e.currentTarget.style.color = `var(--text-primary)`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.textShadow = "0 0 8px transparent";
+                    e.currentTarget.style.color = `var(--text-secondary)`;
+                  }}
                 >
                   {link.label}
                 </button>
@@ -82,9 +94,21 @@ const MainContent: React.FC<MainContentProps> = ({ isVisible }) => {
                 <Link 
                   key={index}
                   href={link.url} 
-                  className="hover:underline" 
+                  className={`hover:underline transition-all duration-200`}
                   rel="noopener noreferrer"
                   target={link.type !== 'email' ? '_blank' : undefined}
+                  style={{ 
+                    textShadow: "0 0 8px transparent",
+                    color: `var(--text-secondary)` 
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.textShadow = `0 0 8px var(--text-primary)`;
+                    e.currentTarget.style.color = `var(--text-primary)`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.textShadow = "0 0 8px transparent";
+                    e.currentTarget.style.color = `var(--text-secondary)`;
+                  }}
                 >
                   {link.label}
                 </Link>
