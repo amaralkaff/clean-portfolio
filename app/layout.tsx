@@ -4,7 +4,6 @@ import './globals.css'
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/react"
 import { ThemeProvider } from './context/ThemeContext'
-import CreatureAnimationWrapper from './components/CreatureAnimationWrapper'
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' })
 
@@ -50,7 +49,6 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ThemeProvider>
-          <CreatureAnimationWrapper />
           {children}
           <SpeedInsights />
           <Analytics />
