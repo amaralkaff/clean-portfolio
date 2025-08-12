@@ -127,4 +127,4 @@ const MainContent: React.FC<MainContentProps> = ({ isVisible }) => {
   );
 };
 
-export default MainContent;
+export default React.memo(MainContent);

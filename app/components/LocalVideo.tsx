@@ -144,4 +144,4 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
 
 LocalVideo.displayName = 'LocalVideo';
 
-export default LocalVideo;
+export default React.memo(LocalVideo);

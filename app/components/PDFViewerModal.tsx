@@ -115,4 +115,4 @@ const PDFViewerModal: React.FC<PDFViewerModalProps> = (props) => {
   );
 };
 
-export default PDFViewerModal;
+export default React.memo(PDFViewerModal);

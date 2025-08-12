@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { animate, createTimer, stagger, utils } from 'animejs';
   
@@ -134,7 +134,7 @@ const CircuitAnimation = ({ isActive, targetRef, sourceRef, chargeLevel = 0 }: C
         });
       }
     }
-  }, [targetRef, sourceRef, theme]);
+  }, [targetRef, sourceRef]);
 
   // Function to create circuits around the target element
   const createCircuitsAroundTarget = useCallback((target: { x: number; y: number }, targetRect: DOMRect) => {
@@ -180,7 +180,7 @@ const CircuitAnimation = ({ isActive, targetRef, sourceRef, chargeLevel = 0 }: C
         ease: 'easeInOutQuad'
       });
     }
-  }, [theme]);
+  }, []);
 
   const createChargingEffect = useCallback(() => {
     if (!svgRef.current || persistentLines.current.length === 0) return;
@@ -595,4 +595,4 @@ const CircuitAnimation = ({ isActive, targetRef, sourceRef, chargeLevel = 0 }: C
   );
 };
   
-export default CircuitAnimation;
+export default React.memo(CircuitAnimation);

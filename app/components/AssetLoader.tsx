@@ -137,4 +137,4 @@ const AssetLoader: React.FC<{ onLoadComplete: () => void }> = ({ onLoadComplete 
   );
 };
 
-export default AssetLoader;
+export default React.memo(AssetLoader);

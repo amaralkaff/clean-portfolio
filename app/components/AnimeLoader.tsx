@@ -68,12 +68,20 @@ const AnimeLoader: React.FC<AnimeLoaderProps> = ({ onComplete, fadeOut = false }
       easing: 'linear'
     });
 
-    // Cleanup function
+    // Proper cleanup function to prevent memory leaks
     return () => {
       timer.pause();
+      timer.reset();
+      
+      // Properly pause and reset animations
       turbulenceAnimation.pause();
+      turbulenceAnimation.reset();
+      
       petalAnimation.pause();
+      petalAnimation.reset();
+      
       rotationAnimation.pause();
+      rotationAnimation.reset();
     };
   }, []);
 
@@ -170,4 +178,4 @@ const AnimeLoader: React.FC<AnimeLoaderProps> = ({ onComplete, fadeOut = false }
   );
 };
 
-export default AnimeLoader; 
+export default React.memo(AnimeLoader); 

@@ -22,71 +22,38 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
   const [pulseAnimation, setPulseAnimation] = useState(false);
   const { theme } = useTheme();
 
-  // Aggressive audio setup and immediate play attempt
+  // Simplified audio setup with user interaction handling
   useEffect(() => {
-    if (audioRef.current) {
-      // Configure audio for best auto-play success
-      audioRef.current.muted = false;
-      audioRef.current.volume = 0.5;
-      audioRef.current.preload = 'auto';
-      audioRef.current.autoplay = true;
-      
-      // Multiple immediate play strategies
-      const aggressiveAutoPlay = async () => {
-        if (!audioRef.current) return;
-        
-        // Strategy 1: Direct play
-        try {
-          await audioRef.current.play();
-          return;
-        } catch (error) {
-          console.log("Direct play failed, trying alternative approaches");
-        }
-        
-        // Strategy 2: Muted play then unmute
-        try {
-          audioRef.current.muted = true;
-          await audioRef.current.play();
-          setTimeout(() => {
-            if (audioRef.current) {
-              audioRef.current.muted = false;
-              audioRef.current.volume = 0.5;
-            }
-          }, 100);
-          return;
-        } catch (error) {
-          console.log("Muted play failed");
-        }
-        
-        // Strategy 3: Set up for immediate interaction response
-        const playOnInteraction = async () => {
+    if (!audioRef.current || !autoPlay) return;
+    
+    const audio = audioRef.current;
+    audio.volume = 0.5;
+    audio.preload = 'auto';
+    
+    // Single play attempt on load
+    const attemptAutoPlay = async () => {
+      try {
+        await audio.play();
+      } catch (error) {
+        // Set up single interaction listener for browsers that block autoplay
+        const playOnFirstInteraction = async () => {
           try {
-            if (audioRef.current) {
-              audioRef.current.muted = false;
-              audioRef.current.volume = 0.5;
-              await audioRef.current.play();
-            }
-          } catch (error) {
-            console.log("Interaction play failed");
+            await audio.play();
+            // Remove listener after successful play
+            document.removeEventListener('click', playOnFirstInteraction);
+            document.removeEventListener('touchstart', playOnFirstInteraction);
+          } catch (e) {
+            console.log('Audio play failed:', e);
           }
         };
         
-        // Add ultra-responsive interaction listener
-        const events = ['click', 'touchstart', 'keydown', 'mousemove'];
-        events.forEach(event => {
-          document.addEventListener(event, playOnInteraction, { 
-            once: true, 
-            passive: true 
-          });
-        });
-      };
-      
-      // Execute immediately and on next tick
-      aggressiveAutoPlay();
-      setTimeout(aggressiveAutoPlay, 10);
-      setTimeout(aggressiveAutoPlay, 100);
-    }
-  }, [audioRef]);
+        document.addEventListener('click', playOnFirstInteraction, { once: true, passive: true });
+        document.addEventListener('touchstart', playOnFirstInteraction, { once: true, passive: true });
+      }
+    };
+    
+    attemptAutoPlay();
+  }, [audioRef, autoPlay]);
 
   // Auto-play next track when current track ends
   useEffect(() => {
@@ -169,7 +136,8 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
         <div className={`px-4 py-2 rounded-lg flex items-center space-x-4 transition-all duration-500 ease-out transform backdrop-blur-md ${isTransitioning ? 'will-change-transform scale-105' : 'scale-100'}`}>
           <button 
             onClick={togglePlay}
-            disabled={isLoading} 
+            disabled={isLoading}
+            aria-label={isPlaying ? 'Pause music' : 'Play music'}
             className={`focus:outline-none transition-all duration-300 ease-out transform hover:scale-110 active:scale-95 ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:rotate-12'}`}
           >
             {isPlaying ? <Pause size={18} className={theme === 'dark' ? 'text-white' : ''} /> : <Play size={18} className={theme === 'dark' ? 'text-white' : ''} />}
@@ -189,14 +157,16 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
 
           <button 
             onClick={nextTrack}
-            disabled={isLoading} 
+            disabled={isLoading}
+            aria-label="Next track" 
             className={`focus:outline-none transition-all duration-300 ease-out transform hover:scale-110 active:scale-95 ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:translate-x-1'}`}
           >
             <SkipForward size={18} className={theme === 'dark' ? 'text-white' : ''} />
           </button>
           
           <button 
-            onClick={toggleExpanded} 
+            onClick={toggleExpanded}
+            aria-label="Minimize music player" 
             className={`focus:outline-none transition-all duration-300 ease-out transform hover:scale-110 active:scale-95 ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:-rotate-12'}`}
           >
             <Minimize2 size={18} className={theme === 'dark' ? 'text-white' : ''} />
@@ -205,7 +175,11 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
       ) : (
         // Collapsed player
         <div 
-          onClick={toggleExpanded} 
+          onClick={toggleExpanded}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && toggleExpanded()}
+          aria-label="Expand music player" 
           className={`rounded-lg w-full h-full flex items-center justify-center cursor-pointer transition-all duration-500 ease-out relative overflow-hidden transform backdrop-blur-md ${pulseAnimation ? 'scale-105' : 'scale-100'} ${isTransitioning ? 'will-change-transform rotate-1' : 'rotate-0'}`}
         >
           <div className={`absolute top-0 left-0 right-0 h-1 overflow-hidden backdrop-blur-sm ${theme === 'dark' ? 'bg-white/20' : 'bg-black/20'}`}>
@@ -253,4 +227,4 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
   );
 };
 
-export default PhonkMusicPlayer;
+export default React.memo(PhonkMusicPlayer);

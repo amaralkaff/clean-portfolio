@@ -136,6 +136,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
                 : 'bg-white/20 hover:bg-white/30 border-black/20 text-black hover:text-gray-800 shadow-[0_4px_16px_rgba(0,0,0,0.1)]'
             }`}
             onClick={closeModal}
+            aria-label="Close project modal"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -219,4 +220,4 @@ const ProjectList: React.FC<ProjectListProps> = ({
   );
 };
 
-export default ProjectList;
+export default React.memo(ProjectList);

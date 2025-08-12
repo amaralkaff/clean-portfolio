@@ -3,17 +3,21 @@ import React, { Suspense, useEffect, useState, useRef } from "react";
 import { useAppViewModel } from "./viewModels/AppViewModel";
 import { useTheme } from "./context/ThemeContext";
 
-// Use next/dynamic instead of the import from 'next/dynamic'
+// Use next/dynamic for lazy loading heavy components
 import dynamic from "next/dynamic";
 
+// Lazy load heavy components with loading fallbacks
 const AnimeLoader = dynamic(() => import("./components/AnimeLoader"), { 
-  ssr: false
+  ssr: false,
+  loading: () => <div className="flex items-center justify-center h-screen">Loading...</div>
 });
 const MainContent = dynamic(() => import("./components/MainContent"), {
-  ssr: false
+  ssr: false,
+  loading: () => <div className="flex items-center justify-center h-full">Loading content...</div>
 });
 const ProjectList = dynamic(() => import("./components/ProjectList"), {
-  ssr: false
+  ssr: false,
+  loading: () => <div className="flex items-center justify-center h-full">Loading projects...</div>
 });
 const Footer = dynamic(() => import("./components/Footer"), {
   ssr: false
@@ -44,54 +48,24 @@ const Home = () => {
     };
   }, []);
 
-  // Immediate audio enablement on page load
+  // Simple audio context initialization
   useEffect(() => {
-    // Try to enable audio context immediately
-    const enableAudioContext = async () => {
+    const enableAudioOnInteraction = async () => {
       try {
-        // Create a silent audio context to bypass restrictions
         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
         if (audioContext.state === 'suspended') {
           await audioContext.resume();
         }
-        
-        // Try to play a silent audio to unlock audio playback
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        gainNode.gain.value = 0;
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        oscillator.start();
-        oscillator.stop(audioContext.currentTime + 0.01);
-        
-        console.log("Audio context enabled successfully");
       } catch (error) {
-        console.log("Audio context enablement failed");
+        console.log('Audio context setup failed:', error);
       }
     };
     
-    // Execute immediately
-    enableAudioContext();
-    
-    // Also set up ultra-responsive interaction handler
-    const immediateAudioEnable = () => {
-      enableAudioContext();
-    };
-    
-    // Multiple event types for maximum coverage
-    const events = ['click', 'touchstart', 'keydown', 'mousemove', 'scroll'];
-    events.forEach(event => {
-      document.addEventListener(event, immediateAudioEnable, { 
-        once: true, 
-        passive: true,
-        capture: true
-      });
-    });
+    // Single interaction listener for audio context
+    document.addEventListener('click', enableAudioOnInteraction, { once: true, passive: true });
     
     return () => {
-      events.forEach(event => {
-        document.removeEventListener(event, immediateAudioEnable);
-      });
+      document.removeEventListener('click', enableAudioOnInteraction);
     };
   }, []);
 

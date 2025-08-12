@@ -28,4 +28,4 @@ const LottieLoader: React.FC = () => {
   );
 };
 
-export default LottieLoader;
+export default React.memo(LottieLoader);
