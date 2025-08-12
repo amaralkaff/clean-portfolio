@@ -1,16 +1,17 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/react"
 import { ThemeProvider } from './context/ThemeContext'
 import ErrorBoundary from './components/ErrorBoundary'
 
-const inter = Inter({ 
+const jetbrainsMono = JetBrains_Mono({ 
   subsets: ['latin'], 
   display: 'swap',
   preload: true,
-  fallback: ['system-ui', 'arial']
+  variable: '--font-jetbrains-mono',
+  fallback: ['Monaco', 'Menlo', 'Ubuntu Mono', 'monospace']
 })
 
 export const viewport = {
@@ -59,7 +60,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://vercel.live" />
         <link rel="dns-prefetch" href="https://vitals.vercel-analytics.com" />
       </head>
-      <body className={inter.className}>
+      <body className={`${jetbrainsMono.variable} font-mono`}>
         <ErrorBoundary>
           <ThemeProvider>
             {children}

@@ -9,6 +9,9 @@ const config: Config = {
   darkMode: 'class',
   theme: {
     extend: {
+      fontFamily: {
+        'mono': ['var(--font-jetbrains-mono)', 'Monaco', 'Menlo', 'Ubuntu Mono', 'monospace'],
+      },
       animation: {
         'background-shift': 'backgroundShift 20s ease infinite',
       },
