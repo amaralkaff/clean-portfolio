@@ -6,18 +6,17 @@ import { useTheme } from "./context/ThemeContext";
 // Use next/dynamic for lazy loading heavy components
 import dynamic from "next/dynamic";
 
-// Lazy load heavy components with loading fallbacks
+// Lazy load heavy components with AnimeLoader fallbacks
 const AnimeLoader = dynamic(() => import("./components/AnimeLoader"), { 
-  ssr: false,
-  loading: () => <div className="flex items-center justify-center h-screen">Loading...</div>
+  ssr: false
 });
 const MainContent = dynamic(() => import("./components/MainContent"), {
   ssr: false,
-  loading: () => <div className="flex items-center justify-center h-full">Loading content...</div>
+  loading: () => <AnimeLoader />
 });
 const ProjectList = dynamic(() => import("./components/ProjectList"), {
   ssr: false,
-  loading: () => <div className="flex items-center justify-center h-full">Loading projects...</div>
+  loading: () => <AnimeLoader />
 });
 const Footer = dynamic(() => import("./components/Footer"), {
   ssr: false
