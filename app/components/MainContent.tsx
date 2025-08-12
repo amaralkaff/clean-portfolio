@@ -9,6 +9,7 @@ import { useTheme } from "../context/ThemeContext";
 
 interface MainContentProps {
   isVisible: boolean;
+  priority?: boolean;
 }
 
 const fadeUpVariant = {

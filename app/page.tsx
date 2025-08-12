@@ -108,7 +108,7 @@ const Home = () => {
             modalVisible ? "hidden md:block" : ""
           }`}
         >
-          <MainContent isVisible={!modalVisible} />
+          <MainContent isVisible={!modalVisible} priority={true} />
         </div>
       </Suspense>
       
