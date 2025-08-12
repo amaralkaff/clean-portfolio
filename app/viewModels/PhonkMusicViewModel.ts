@@ -44,6 +44,7 @@ export function usePhonkMusicViewModel(autoPlay: boolean = true): [PhonkMusicSta
   const currentTimeRef = useRef<number>(0);
 
   const tracks: MusicTrack[] = useMemo(() => [
+    { path: '/music/New Jeans Jersey Remix - Jiandro x Dxrkai.mp3', name: 'New Jeans Jersey Remix - Jiandro x Dxrkai' },
     { path: '/music/FUNK MI CAMINO.mp3', name: 'FUNK MI CAMINO' },
     { path: '/music/X-TALI.mp3', name: 'X-TALI'},
     { path: '/music/Montagem Do Cosmos.mp3', name: 'Montagem Do Cosmos' },
