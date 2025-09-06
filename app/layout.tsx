@@ -5,6 +5,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/react"
 import { ThemeProvider } from './context/ThemeContext'
 import ErrorBoundary from './components/ErrorBoundary'
+import DynamicFavicon from './components/DynamicFavicon'
 
 const jetbrainsMono = JetBrains_Mono({ 
   subsets: ['latin'], 
@@ -24,6 +25,14 @@ export const metadata: Metadata = {
   description: 'amangLy. - A personal portfolio by amangly.',
   keywords: ['portfolio', 'developer', 'web development', 'react', 'nextjs'],
   authors: [{ name: 'amangLy' }],
+  icons: {
+    icon: [
+      { url: '/favicon-light.svg', media: '(prefers-color-scheme: light)' },
+      { url: '/favicon-dark.svg', media: '(prefers-color-scheme: dark)' }
+    ],
+    shortcut: '/favicon-light.svg',
+    apple: '/favicon-light.svg',
+  },
   openGraph: {
     title: 'amangLy. - Portfolio',
     description: 'amangLy. - A personal portfolio by amangly.',
@@ -63,6 +72,7 @@ export default function RootLayout({
       <body className={`${jetbrainsMono.variable} font-mono`}>
         <ErrorBoundary>
           <ThemeProvider>
+            <DynamicFavicon />
             {children}
             <SpeedInsights />
             <Analytics />
