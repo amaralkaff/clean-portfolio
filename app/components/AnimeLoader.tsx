@@ -88,9 +88,9 @@ const AnimeLoader: React.FC<AnimeLoaderProps> = ({ onComplete, fadeOut = false }
   return (
     <div 
       ref={containerRef}
-      className={`fixed inset-0 flex items-center justify-center bg-transparent transition-opacity duration-500 ease-out ${
+      className={`fixed inset-0 flex items-center justify-center transition-opacity duration-500 ease-out ${
         isVisible ? 'opacity-100' : 'opacity-0'
-      }`}
+      } ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}
       style={{ zIndex: 9999 }}
     >
       <div className="relative w-40 h-40 md:w-40 md:h-40">
