@@ -88,19 +88,21 @@ const AnimeLoader: React.FC<AnimeLoaderProps> = ({ onComplete, fadeOut = false }
   return (
     <div 
       ref={containerRef}
-      className={`flex items-center justify-center h-screen bg-transparent transition-opacity duration-500 ease-out ${
+      className={`fixed inset-0 flex items-center justify-center bg-transparent transition-opacity duration-500 ease-out ${
         isVisible ? 'opacity-100' : 'opacity-0'
       }`}
+      style={{ zIndex: 9999 }}
     >
-      <div className="relative">
-        {/* Animated SVG with filters */}
+      <div className="relative w-40 h-40 md:w-40 md:h-40">
+        {/* Animated SVG with filters - responsive sizing */}
         <svg
           ref={svgRef}
-          width="160"
-          height="160"
+          width="100%"
+          height="100%"
           viewBox="0 0 160 160"
           xmlns="http://www.w3.org/2000/svg"
-          className="drop-shadow-lg"
+          className="drop-shadow-lg w-full h-full"
+          preserveAspectRatio="xMidYMid meet"
         >
           <defs>
             {/* Turbulence filter for liquid effect */}
