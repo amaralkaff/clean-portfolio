@@ -24,7 +24,7 @@ export function useMainContentViewModel(): [MainContentState, MainContentActions
   const [isPDFModalOpen, setIsPDFModalOpen] = useState(false);
 
   const personalInfo = {
-    name: "Abu Ammar",
+    name: "AmangLy",
     tagline: "Human side of zero and one",
     contactLinks: [
       {
