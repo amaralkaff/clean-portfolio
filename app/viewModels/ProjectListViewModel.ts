@@ -9,12 +9,14 @@ export interface ProjectListState {
   isActive: boolean;
   isVideoLoading: boolean;
   projects: Project[];
+  isDataLoaded: boolean;
 }
 
 export interface ProjectListActions {
   handleInteraction: (index: number) => Promise<void>;
   closeModal: () => void;
   setIsActive: (isActive: boolean) => void;
+  loadProjectData: () => void;
 }
 
 export function useProjectListViewModel(
@@ -24,6 +26,8 @@ export function useProjectListViewModel(
   const [isMobile, setIsMobile] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [isVideoLoading, setIsVideoLoading] = useState(false);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [projectsData, setProjectsData] = useState<Project[]>([]);
   const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -36,6 +40,17 @@ export function useProjectListViewModel(
     window.addEventListener("resize", updateMedia);
     return () => window.removeEventListener("resize", updateMedia);
   }, []);
+
+  // Load project data when needed
+  const loadProjectData = useCallback(() => {
+    if (!isDataLoaded) {
+      // Simulate loading delay for heavy data
+      setTimeout(() => {
+        setProjectsData(projects);
+        setIsDataLoaded(true);
+      }, 100);
+    }
+  }, [isDataLoaded]);
 
   const closeModal = useCallback(() => {
     setSelectedProject(null);
@@ -96,12 +111,14 @@ export function useProjectListViewModel(
       isMobile, 
       isActive, 
       isVideoLoading,
-      projects 
+      projects: isDataLoaded ? projectsData : projects.map(p => ({ ...p, name: p.name, year: p.year, techStack: [], video: '' })), // Only show basic info until loaded
+      isDataLoaded 
     },
     {
       handleInteraction,
       closeModal,
-      setIsActive
+      setIsActive,
+      loadProjectData
     }
   ];
 } 

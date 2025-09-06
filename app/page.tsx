@@ -6,25 +6,36 @@ import { useTheme } from "./context/ThemeContext";
 // Use next/dynamic for lazy loading heavy components
 import dynamic from "next/dynamic";
 
-// Lazy load heavy components with AnimeLoader fallbacks
+// Strategic component loading - Critical first, secondary on demand
 const AnimeLoader = dynamic(() => import("./components/AnimeLoader"), { 
   ssr: false
 });
+
+// Critical components - Load immediately
 const MainContent = dynamic(() => import("./components/MainContent"), {
   ssr: false,
   loading: () => <AnimeLoader />
 });
+const ThemeToggle = dynamic(() => import("./components/ThemeToggle"), {
+  ssr: false
+});
+
+// Secondary components - Load conditionally
 const ProjectList = dynamic(() => import("./components/ProjectList"), {
   ssr: false,
   loading: () => <AnimeLoader />
 });
-const Footer = dynamic(() => import("./components/Footer"), {
-  ssr: false
-});
+
+// Deferred components - Load after critical path
 const PhonkMusicPlayer = dynamic(() => import("./components/PhonkMusicPlayer"), {
-  ssr: false
+  ssr: false,
+  loading: () => null // No loader for background component
 });
-const ThemeToggle = dynamic(() => import("./components/ThemeToggle"), {
+const Footer = dynamic(() => import("./components/Footer"), {
+  ssr: false,
+  loading: () => null // No loader for footer
+});
+const PerformanceMonitor = dynamic(() => import("./components/PerformanceMonitor"), {
   ssr: false
 });
 
@@ -36,6 +47,7 @@ const Home = () => {
   
   // Track if hovering over the main app area
   const [isHoveringApp, setIsHoveringApp] = useState(false);
+  const [deferredComponentsLoaded, setDeferredComponentsLoaded] = useState(false);
   const appFadeOutTimer = useRef<NodeJS.Timeout | null>(null);
 
   // Cleanup timer on unmount
@@ -47,17 +59,34 @@ const Home = () => {
     };
   }, []);
 
-  // Simple audio context initialization
+  // Defer loading of non-critical components
   useEffect(() => {
-    const enableAudioOnInteraction = async () => {
-      try {
-        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-        if (audioContext.state === 'suspended') {
-          await audioContext.resume();
+    const timer = setTimeout(() => {
+      setDeferredComponentsLoaded(true);
+    }, 1000); // Load deferred components after 1s
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Deferred audio context initialization to reduce main thread blocking
+  useEffect(() => {
+    let audioInitialized = false;
+    
+    const enableAudioOnInteraction = () => {
+      if (audioInitialized) return;
+      audioInitialized = true;
+      
+      // Use setTimeout to defer audio context creation off main thread
+      setTimeout(async () => {
+        try {
+          const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+          if (audioContext.state === 'suspended') {
+            await audioContext.resume();
+          }
+        } catch (error) {
+          console.log('Audio context setup failed:', error);
         }
-      } catch (error) {
-        console.log('Audio context setup failed:', error);
-      }
+      }, 0);
     };
     
     // Single interaction listener for audio context
@@ -89,16 +118,7 @@ const Home = () => {
     >
       <ThemeToggle />
       
-      <Suspense fallback={<AnimeLoader />}>
-        <div
-          className={`order-2 md:order-1 w-full md:w-1/2 h-screen overflow-auto transition-all duration-500 ${
-            modalVisible ? "md:w-full" : ""
-          }`}
-        >
-          <ProjectList onModalToggle={setModalVisible} isAppHovered={isHoveringApp} />
-        </div>
-      </Suspense>
-      
+      {/* Critical Content - Always Load */}
       <Suspense fallback={<AnimeLoader />}>
         <div
           className={`order-1 md:order-2 w-full md:w-1/2 transition-all duration-500 ${
@@ -108,9 +128,25 @@ const Home = () => {
           <MainContent isVisible={!modalVisible} priority={true} />
         </div>
       </Suspense>
+
+      {/* ProjectList - Always visible, data loads on hover */}
+      <Suspense fallback={<AnimeLoader />}>
+        <div
+          className={`order-2 md:order-1 w-full md:w-1/2 h-screen overflow-auto transition-all duration-500 ${
+            modalVisible ? "md:w-full" : ""
+          }`}
+        >
+          <ProjectList 
+            onModalToggle={setModalVisible} 
+            isAppHovered={isHoveringApp}
+            shouldLoadData={isHoveringApp} 
+          />
+        </div>
+      </Suspense>
       
       <Footer />
       <PhonkMusicPlayer autoPlay={true} />
+      <PerformanceMonitor />
     </div>
   );
 };

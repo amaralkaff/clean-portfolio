@@ -1,0 +1,9 @@
+{
+  "name": "Clean Portfolio",
+  "short_name": "Portfolio",
+  "description": "Developer Portfolio with Next.js",
+  "version": "0.1.0",
+  "chrome_devtools": {
+    "enabled": false
+  }
+}

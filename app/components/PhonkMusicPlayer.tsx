@@ -71,28 +71,37 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
     };
   }, [nextTrack, audioRef]);
 
-  // Animate visualizer bars
+  // Optimized visualizer bars with requestAnimationFrame
   useEffect(() => {
     if (!isPlaying) return;
     
-    const interval = setInterval(() => {
-      setVisualizerBars([
-        Math.random() * 0.7 + 0.3,
-        Math.random() * 0.7 + 0.3,
-        Math.random() * 0.7 + 0.3
-      ]);
-    }, 300);
+    let animationId: number;
+    let lastUpdate = 0;
     
-    return () => clearInterval(interval);
+    const updateBars = (timestamp: number) => {
+      if (timestamp - lastUpdate > 400) { // Reduce update frequency from 300ms to 400ms
+        setVisualizerBars([
+          Math.random() * 0.7 + 0.3,
+          Math.random() * 0.7 + 0.3,
+          Math.random() * 0.7 + 0.3
+        ]);
+        lastUpdate = timestamp;
+      }
+      animationId = requestAnimationFrame(updateBars);
+    };
+    
+    animationId = requestAnimationFrame(updateBars);
+    
+    return () => cancelAnimationFrame(animationId);
   }, [isPlaying]);
 
-  // Pulse animation for minimized state
+  // Optimized pulse animation with longer intervals
   useEffect(() => {
     if (isExpanded) return;
     
     const pulseInterval = setInterval(() => {
       setPulseAnimation(prev => !prev);
-    }, 2000);
+    }, 3000); // Increased from 2000ms to 3000ms to reduce main thread usage
     
     return () => clearInterval(pulseInterval);
   }, [isExpanded]);

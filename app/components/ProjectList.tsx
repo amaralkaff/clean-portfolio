@@ -19,6 +19,7 @@ const LocalVideo = React.lazy(() => import("./LocalVideo"));
 interface ProjectListProps {
   onModalToggle: (isVisible: boolean) => void;
   isAppHovered: boolean;
+  shouldLoadData?: boolean;
 }
 
 const fadeUpVariant = {
@@ -29,6 +30,7 @@ const fadeUpVariant = {
 const ProjectList: React.FC<ProjectListProps> = ({
   onModalToggle,
   isAppHovered,
+  shouldLoadData = false,
 }): ReactElement => {
   const modalRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -37,8 +39,8 @@ const ProjectList: React.FC<ProjectListProps> = ({
   const projectRefs = useRef<(HTMLDivElement | null)[]>([]);
   
   const [state, actions] = useProjectListViewModel(onModalToggle);
-  const { selectedProject, isMobile, isActive, projects } = state;
-  const { handleInteraction, closeModal, setIsActive } = actions;
+  const { selectedProject, isMobile, isActive, projects, isDataLoaded } = state;
+  const { handleInteraction, closeModal, setIsActive, loadProjectData } = actions;
   const { theme } = useTheme();
   
   // Track which project is being hovered
@@ -67,6 +69,10 @@ const ProjectList: React.FC<ProjectListProps> = ({
         onMouseEnter={() => {
           setIsActive(true);
           setIsHoveringProjectList(true);
+          // Load project data on first hover
+          if (shouldLoadData && !isDataLoaded) {
+            loadProjectData();
+          }
         }}
         onMouseLeave={() => {
           setIsHoveringProjectList(false);
