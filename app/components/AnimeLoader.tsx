@@ -12,6 +12,33 @@ const AnimeLoader: React.FC<AnimeLoaderProps> = ({ onComplete, fadeOut = false }
   const svgRef = useRef<SVGSVGElement>(null);
   const { theme } = useTheme();
   const [isVisible, setIsVisible] = useState(true);
+  const [currentTheme, setCurrentTheme] = useState<'light' | 'dark'>('light');
+
+  // Function to detect current theme on initial load
+  useEffect(() => {
+    const detectInitialTheme = () => {
+      if (theme) {
+        setCurrentTheme(theme);
+        return;
+      }
+
+      // Fallback detection for initial load
+      if (typeof window !== 'undefined') {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const hasAutoMode = document.documentElement.classList.contains('auto');
+        
+        if (hasAutoMode) {
+          // Check time-based auto mode (6 PM - 6 AM = dark)
+          const hour = new Date().getHours();
+          setCurrentTheme((hour >= 18 || hour < 6) ? 'dark' : 'light');
+        } else {
+          setCurrentTheme(prefersDark ? 'dark' : 'light');
+        }
+      }
+    };
+
+    detectInitialTheme();
+  }, [theme]);
 
   useEffect(() => {
     if (fadeOut) {
@@ -146,7 +173,7 @@ const AnimeLoader: React.FC<AnimeLoaderProps> = ({ onComplete, fadeOut = false }
                     cy="-25"
                     rx="4"
                     ry="15"
-                    fill={theme === 'dark' ? '#ffffff' : '#000000'}
+                    fill={currentTheme === 'dark' ? '#ffffff' : '#000000'}
                     filter="url(#liquidEffect) url(#glow)"
                     opacity="0.8"
                   />
@@ -156,7 +183,7 @@ const AnimeLoader: React.FC<AnimeLoaderProps> = ({ onComplete, fadeOut = false }
                     cy="-45"
                     rx="3"
                     ry="10"
-                    fill={theme === 'dark' ? '#ffffff' : '#000000'}
+                    fill={currentTheme === 'dark' ? '#ffffff' : '#000000'}
                     filter="url(#liquidEffect)"
                     opacity="0.6"
                   />
@@ -169,7 +196,7 @@ const AnimeLoader: React.FC<AnimeLoaderProps> = ({ onComplete, fadeOut = false }
               cx="0"
               cy="0"
               r="6"
-              fill={theme === 'dark' ? '#ffffff' : '#000000'}
+              fill={currentTheme === 'dark' ? '#ffffff' : '#000000'}
               filter="url(#glow)"
               opacity="0.9"
             />
