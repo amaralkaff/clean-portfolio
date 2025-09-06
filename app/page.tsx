@@ -30,7 +30,7 @@ const ThemeToggle = dynamic(() => import("./components/ThemeToggle"), {
 
 const Home = () => {
   const [state, actions] = useAppViewModel();
-  const { modalVisible, isLoading } = state;
+  const { modalVisible } = state;
   const { setModalVisible } = actions;
   const { theme } = useTheme();
   
@@ -68,9 +68,6 @@ const Home = () => {
     };
   }, []);
 
-  if (isLoading) {
-    return <AnimeLoader />;
-  }
 
   return (
     <div 
