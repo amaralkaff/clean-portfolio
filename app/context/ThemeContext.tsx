@@ -21,6 +21,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [isAutoMode, setIsAutoMode] = useState<boolean>(true);
 
   useEffect(() => {
+    // Load saved preferences from localStorage
+    const savedAutoMode = localStorage.getItem('autoMode');
+    const savedTheme = localStorage.getItem('theme') as Theme;
+    
+    if (savedAutoMode !== null) {
+      setIsAutoMode(savedAutoMode === 'true');
+    }
+    
+    if (savedTheme && savedAutoMode === 'false') {
+      setTheme(savedTheme);
+    }
+  }, []);
+
+  useEffect(() => {
     // Function to check if it's nighttime (between 6 PM and 6 AM)
     const isNightTime = () => {
       const hours = new Date().getHours();
@@ -30,7 +44,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     // Set theme based on time
     const updateThemeByTime = () => {
       if (isAutoMode) {
-        setTheme(isNightTime() ? "dark" : "light");
+        const newTheme = isNightTime() ? "dark" : "light";
+        setTheme(newTheme);
+        localStorage.setItem('theme', newTheme);
       }
     };
 
@@ -44,8 +60,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [isAutoMode]);
 
   const toggleTheme = () => {
-    setIsAutoMode(false);
-    setTheme(theme === "dark" ? "light" : "dark");
+    const newAutoMode = false;
+    const newTheme = theme === "dark" ? "light" : "dark";
+    
+    setIsAutoMode(newAutoMode);
+    setTheme(newTheme);
+    
+    // Save preferences to localStorage
+    localStorage.setItem('autoMode', 'false');
+    localStorage.setItem('theme', newTheme);
   };
 
   // Apply theme to document
