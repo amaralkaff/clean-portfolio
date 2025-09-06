@@ -90,9 +90,28 @@ const AnimeLoader: React.FC<AnimeLoaderProps> = ({ onComplete, fadeOut = false }
       ref={containerRef}
       className={`fixed inset-0 flex items-center justify-center transition-opacity duration-500 ease-out ${
         isVisible ? 'opacity-100' : 'opacity-0'
-      } ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}
-      style={{ zIndex: 9999 }}
+      }`}
+      style={{ 
+        zIndex: 9999,
+        backgroundSize: '300% 300%',
+        backgroundImage: `linear-gradient(-45deg, ${theme === 'dark' ? '#1a1a1a 0%, #2d3748 25%, #1a1a1a 50%, #2d3748 75%' : '#ffff 0%, #E5E7EB 25%, #ffff 50%, #E5E7EB 75%'})`,
+        animation: 'background-shift 10s ease infinite'
+      }}
     >
+      {/* Grain overlay matching body::before */}
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: theme === 'dark' 
+            ? `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' seed='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0 0.5 1'/%3E%3C/feComponentTransfer%3E%3CfeGaussianBlur stdDeviation='0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' fill='%23999999' filter='url(%23n)' opacity='0.8'/%3E%3C/svg%3E")`
+            : `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' seed='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0 0.5 1'/%3E%3C/feComponentTransfer%3E%3CfeGaussianBlur stdDeviation='0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' fill='%23222222' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`,
+          backgroundRepeat: 'repeat',
+          backgroundSize: '200px 200px',
+          mixBlendMode: theme === 'dark' ? 'screen' : 'multiply',
+          opacity: theme === 'dark' ? 0.08 : 0.3,
+          filter: theme === 'dark' ? 'contrast(1.2)' : 'contrast(2.5) brightness(0.8)'
+        }}
+      />
       <div className="relative w-40 h-40 md:w-40 md:h-40">
         {/* Animated SVG with filters - responsive sizing */}
         <svg
