@@ -169,7 +169,7 @@ const AnimeLoader: React.FC<AnimeLoaderProps> = ({ onComplete, fadeOut = false }
               cx="0"
               cy="0"
               r="6"
-              fill={currentTheme === 'dark' ? '#ffffff' : '#000000'}
+              fill={theme === 'dark' ? '#ffffff' : '#000000'}
               filter="url(#glow)"
               opacity="0.9"
             />
