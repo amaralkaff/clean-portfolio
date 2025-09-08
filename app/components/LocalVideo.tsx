@@ -92,6 +92,12 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
 
     return (
       <div ref={targetRef as React.RefObject<HTMLDivElement>} className="relative w-full h-full">
+        {/* Loading State with AnimeLoader */}
+        {isLoading && shouldLoad && (
+          <div className="absolute inset-0 flex items-center justify-center rounded-2xl overflow-hidden">
+            <AnimeLoader />
+          </div>
+        )}
 
         {/* Error State */}
         {hasError && !isLoading && (
@@ -126,7 +132,7 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
             loop={loop}
             muted={muted}
             controls={controls}
-            className={`${className} rounded-2xl`}
+            className={`${className} rounded-2xl ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
             poster={poster}
             preload={lazyLoad ? "none" : preload}
             playsInline
