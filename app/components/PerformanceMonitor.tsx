@@ -35,7 +35,9 @@ const PerformanceMonitor = () => {
       const entries = entryList.getEntries();
       const lastEntry = entries[entries.length - 1] as any;
       metrics.lcp = lastEntry.startTime;
-      logMetric('LCP (Largest Contentful Paint)', metrics.lcp, 2500);
+      if (metrics.lcp !== null) {
+        logMetric('LCP (Largest Contentful Paint)', metrics.lcp, 2500);
+      }
     });
 
     // First Contentful Paint
@@ -44,7 +46,9 @@ const PerformanceMonitor = () => {
       entries.forEach((entry: any) => {
         if (entry.name === 'first-contentful-paint') {
           metrics.fcp = entry.startTime;
-          logMetric('FCP (First Contentful Paint)', metrics.fcp, 1800);
+          if (metrics.fcp !== null) {
+            logMetric('FCP (First Contentful Paint)', metrics.fcp, 1800);
+          }
         }
       });
     });
@@ -70,7 +74,9 @@ const PerformanceMonitor = () => {
       entries.forEach((entry: any) => {
         if (entry.entryType === 'navigation') {
           metrics.ttfb = entry.responseStart - entry.requestStart;
-          logMetric('TTFB (Time to First Byte)', metrics.ttfb, 800);
+          if (metrics.ttfb !== null) {
+            logMetric('TTFB (Time to First Byte)', metrics.ttfb, 800);
+          }
         }
       });
     });

@@ -134,6 +134,7 @@ const CircuitAnimation = ({ isActive, targetRef, sourceRef, chargeLevel = 0 }: C
         });
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetRef, sourceRef]);
 
   // Function to create circuits around the target element
@@ -310,6 +311,7 @@ const CircuitAnimation = ({ isActive, targetRef, sourceRef, chargeLevel = 0 }: C
         });
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chargeLevel, theme, sourceRef]);
 
   // Function to create rollback particles that flow in reverse
