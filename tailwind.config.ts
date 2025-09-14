@@ -10,7 +10,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        'mono': ['var(--font-jetbrains-mono)', 'Monaco', 'Menlo', 'Ubuntu Mono', 'monospace'],
+        'sans': ['var(--font-poppins)', 'system-ui', 'Arial', 'sans-serif'],
       },
       animation: {
         'background-shift': 'backgroundShift 20s ease infinite',

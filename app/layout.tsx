@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { JetBrains_Mono } from 'next/font/google'
+import { Poppins } from 'next/font/google'
 import './globals.css'
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/react"
@@ -7,12 +7,13 @@ import { ThemeProvider } from './context/ThemeContext'
 import ErrorBoundary from './components/ErrorBoundary'
 import DynamicFavicon from './components/DynamicFavicon'
 
-const jetbrainsMono = JetBrains_Mono({ 
-  subsets: ['latin'], 
+const poppins = Poppins({
+  weight: ['300', '400', '500', '600', '700'],
+  subsets: ['latin'],
   display: 'swap',
   preload: true,
-  variable: '--font-jetbrains-mono',
-  fallback: ['Monaco', 'Menlo', 'Ubuntu Mono', 'monospace']
+  variable: '--font-poppins',
+  fallback: ['system-ui', 'Arial', 'sans-serif']
 })
 
 export const viewport = {
@@ -69,7 +70,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://vercel.live" />
         <link rel="dns-prefetch" href="https://vitals.vercel-analytics.com" />
       </head>
-      <body className={`${jetbrainsMono.variable} font-mono`}>
+      <body className={`${poppins.variable} font-sans`}>
         <ErrorBoundary>
           <ThemeProvider>
             <DynamicFavicon />
