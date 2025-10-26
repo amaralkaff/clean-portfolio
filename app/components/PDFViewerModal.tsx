@@ -51,17 +51,11 @@ const PDFViewerModal: React.FC<PDFViewerModalProps> = (props) => {
           </button>
           
           <motion.div
-            initial={{ scale: 0.8, opacity: 0, rotateX: 10, y: 50 }}
-            animate={{ scale: 1, opacity: 1, rotateX: 0, y: 0 }}
-            exit={{ scale: 0.8, opacity: 0, rotateX: -10, y: 50 }}
-            transition={{ 
-              type: "spring", 
-              stiffness: 300, 
-              damping: 30,
-              opacity: { duration: 0.3 },
-              scale: { duration: 0.4 },
-              rotateX: { duration: 0.4 },
-              y: { duration: 0.4 }
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{
+              duration: 0.15
             }}
             className={`liquid-glass-modal p-4 rounded-3xl w-11/12 h-5/6 relative overflow-hidden backdrop-blur-2xl backdrop-saturate-150 border shadow-2xl ${
               theme === 'dark'

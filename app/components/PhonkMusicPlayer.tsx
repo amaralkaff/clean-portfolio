@@ -20,40 +20,41 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [visualizerBars, setVisualizerBars] = useState([0.3, 0.8, 0.5]);
   const [pulseAnimation, setPulseAnimation] = useState(false);
+  const [hasTriggeredOnce, setHasTriggeredOnce] = useState(false);
   const { theme } = useTheme();
 
-  // Simplified audio setup with user interaction handling
+  // Audio setup with one-time trigger on first user interaction
   useEffect(() => {
     if (!audioRef.current || !autoPlay) return;
-    
+
     const audio = audioRef.current;
     audio.volume = 0.5;
     audio.preload = 'auto';
-    
-    // Single play attempt on load
-    const attemptAutoPlay = async () => {
-      try {
-        await audio.play();
-      } catch (error) {
-        // Set up single interaction listener for browsers that block autoplay
-        const playOnFirstInteraction = async () => {
-          try {
-            await audio.play();
-            // Remove listener after successful play
-            document.removeEventListener('click', playOnFirstInteraction);
-            document.removeEventListener('touchstart', playOnFirstInteraction);
-          } catch (e) {
-            console.log('Audio play failed:', e);
-          }
-        };
-        
-        document.addEventListener('click', playOnFirstInteraction, { once: true, passive: true });
-        document.addEventListener('touchstart', playOnFirstInteraction, { once: true, passive: true });
-      }
-    };
-    
-    attemptAutoPlay();
+
+    // No auto-play attempt - wait for user interaction
   }, [audioRef, autoPlay]);
+
+  const handleFirstInteraction = async (e?: React.MouseEvent | React.KeyboardEvent) => {
+    if (hasTriggeredOnce || !audioRef.current || !autoPlay) return;
+
+    // Stop event propagation to prevent triggering from parent elements
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+
+    console.log('First interaction triggered!'); // Debug log
+
+    try {
+      setHasTriggeredOnce(true);
+      await audioRef.current.play();
+      // Expand the player after successful play
+      setIsExpanded(true);
+      console.log('Music started successfully!'); // Debug log
+    } catch (error) {
+      console.log('Audio play failed on first interaction:', error);
+    }
+  };
 
   // Auto-play next track when current track ends
   useEffect(() => {
@@ -107,14 +108,20 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
   }, [isExpanded]);
 
   const toggleExpanded = () => {
+    // Handle first-time interaction
+    if (!hasTriggeredOnce) {
+      handleFirstInteraction();
+      return;
+    }
+
     setIsTransitioning(true);
     setIsExpanded(!isExpanded);
-    
+
     // Smooth transition timing
     setTimeout(() => {
       setIsTransitioning(false);
     }, 450);
-    
+
     // Start playing music when expanded if currently paused
     if (!isExpanded && !isPlaying && !isLoading) {
       setTimeout(() => {
@@ -183,12 +190,15 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
         </div>
       ) : (
         // Collapsed player
-        <div 
-          onClick={toggleExpanded}
+        <div
+          onClick={(e) => {
+            console.log('Music player clicked! hasTriggeredOnce:', hasTriggeredOnce);
+            hasTriggeredOnce ? toggleExpanded() : handleFirstInteraction(e);
+          }}
           role="button"
           tabIndex={0}
-          onKeyDown={(e) => e.key === 'Enter' && toggleExpanded()}
-          aria-label="Expand music player" 
+          onKeyDown={(e) => e.key === 'Enter' && (hasTriggeredOnce ? toggleExpanded() : handleFirstInteraction())}
+          aria-label={hasTriggeredOnce ? "Expand music player" : "Click to start music"} 
           className={`rounded-lg w-full h-full flex items-center justify-center cursor-pointer transition-all duration-500 ease-out relative overflow-hidden transform backdrop-blur-md ${pulseAnimation ? 'scale-105' : 'scale-100'} ${isTransitioning ? 'will-change-transform rotate-1' : 'rotate-0'}`}
         >
           <div className={`absolute top-0 left-0 right-0 h-1 overflow-hidden backdrop-blur-sm ${theme === 'dark' ? 'bg-white/20' : 'bg-black/20'}`}>
@@ -224,7 +234,7 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
             </div>
             
             <div className={`text-[8px] font-bold ${theme === 'dark' ? 'text-white' : 'text-black'} ${isPlaying ? 'opacity-100' : 'opacity-70'}`}>
-              {isPlaying ? "NOW PLAYING" : "CLICK TO PLAY"}
+              {isPlaying ? "NOW PLAYING" : hasTriggeredOnce ? "CLICK TO PLAY" : "START MUSIC"}
             </div>
           </div>
           

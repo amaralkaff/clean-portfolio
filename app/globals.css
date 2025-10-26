@@ -116,7 +116,6 @@ body::before {
 }
 
 .liquid-glass-modal {
-  animation: glass-float 6s ease-in-out infinite;
   position: relative;
 }
 
