@@ -191,7 +191,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
             >
               <LocalVideo
                 ref={videoRef}
-                src={projects[selectedProject]?.video || ''}
+                src={projects[selectedProject]?.video}
                 autoplay={true}
                 controls={false}
                 muted={true}
