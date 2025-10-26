@@ -46,6 +46,9 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
       threshold: 0.1,
     });
 
+    // Debug log to track src value
+    console.log('LocalVideo rendered with src:', src, 'shouldLoad:', shouldLoad);
+
     // Update shouldLoad when intersection occurs
     useEffect(() => {
       if (lazyLoad && (isIntersecting || hasIntersected)) {
@@ -63,6 +66,7 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
       let loadingTimeout: NodeJS.Timeout;
 
       const handleCanPlay = () => {
+        console.log("Video can play, setting loading to false");
         setIsLoading(false);
         if (autoplay && videoElement.paused) {
           const playPromise = videoElement.play();
@@ -76,29 +80,32 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
       };
 
       const handleLoadStart = () => {
+        console.log("Video load start");
         setIsLoading(true);
         setHasError(false);
       };
 
       const handleError = (e: Event) => {
+        console.error("Video loading error:", e);
         setIsLoading(false);
         setHasError(true);
-        console.error("Video loading error:", e);
       };
 
       const handleStalled = () => {
         console.log("Video loading stalled, attempting to continue...");
       };
 
+      const handleProgress = () => {
+        console.log("Video loading progress");
+      };
+
       // Add timeout to prevent infinite loading
       loadingTimeout = setTimeout(() => {
-        if (isLoading) {
-          console.warn("Video loading timeout, forcing play attempt");
-          setIsLoading(false);
-          // Try to play anyway
-          if (autoplay && videoElement.paused) {
-            videoElement.play().catch(console.error);
-          }
+        console.warn("Video loading timeout, forcing play attempt");
+        setIsLoading(false);
+        // Try to play anyway
+        if (autoplay && videoElement.paused) {
+          videoElement.play().catch(console.error);
         }
       }, 10000); // 10 second timeout
 
@@ -107,11 +114,11 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
       videoElement.addEventListener('canplay', handleCanPlay);
       videoElement.addEventListener('error', handleError);
       videoElement.addEventListener('stalled', handleStalled);
+      videoElement.addEventListener('progress', handleProgress);
 
-      // Only force reload if src actually changed
-      if (videoElement.src !== (lowResSrc || src)) {
-        videoElement.load();
-      }
+      // Load the video
+      console.log("Loading video with src:", src);
+      videoElement.load();
 
       return () => {
         clearTimeout(loadingTimeout);
@@ -119,8 +126,9 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
         videoElement.removeEventListener('canplay', handleCanPlay);
         videoElement.removeEventListener('error', handleError);
         videoElement.removeEventListener('stalled', handleStalled);
+        videoElement.removeEventListener('progress', handleProgress);
       };
-    }, [ref, src, lowResSrc, autoplay, shouldLoad, isLoading]);
+    }, [ref, src, lowResSrc, autoplay, shouldLoad]);
 
     return (
       <div ref={targetRef as React.RefObject<HTMLDivElement>} className="relative w-full h-full">
@@ -155,11 +163,11 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
         )}
 
         {/* Video Element */}
-        {shouldLoad && src && src.trim() !== '' && (lowResSrc || src) ? (
+        {shouldLoad && src && src.trim() !== '' ? (
           <video
             ref={ref}
             key={src} // Force remount when src changes
-            src={(lowResSrc || src)?.trim() || undefined}
+            src={src.trim() || undefined}
             autoPlay={autoplay}
             loop={loop}
             muted={muted}
