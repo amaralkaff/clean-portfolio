@@ -63,11 +63,13 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
       const handleLoadedData = () => {
         setIsLoading(false);
         if (autoplay) {
+          // Attempt to play with proper error handling
           const playPromise = videoElement.play();
           if (playPromise !== undefined) {
             playPromise.catch((error) => {
-              console.log("Playback failed:", error);
-              setHasError(true);
+              console.log("Autoplay blocked, waiting for user interaction:", error);
+              // Don't set error state for autoplay policy violations
+              // Video will play when user interacts with it
             });
           }
         }
@@ -90,8 +92,20 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
       };
     }, [ref, src, autoplay, shouldLoad]);
 
+    const handleVideoClick = () => {
+      if (ref && 'current' in ref && ref.current && ref.current.paused && autoplay) {
+        ref.current.play().catch(error => {
+          console.log("Play failed on click:", error);
+        });
+      }
+    };
+
     return (
-      <div ref={targetRef as React.RefObject<HTMLDivElement>} className="relative w-full h-full">
+      <div
+        ref={targetRef as React.RefObject<HTMLDivElement>}
+        className="relative w-full h-full"
+        onClick={handleVideoClick}
+      >
         {/* Loading State with AnimeLoader */}
         {isLoading && shouldLoad && (
           <div className="absolute inset-0 flex items-center justify-center rounded-2xl overflow-hidden">

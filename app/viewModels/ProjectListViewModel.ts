@@ -81,11 +81,10 @@ export function useProjectListViewModel(
     }
   };
 
-  // Effect to handle video playback when project changes
+  // Effect to handle video loading when project changes
   useEffect(() => {
     if (videoRef.current && selectedProject !== null) {
       videoRef.current.load();
-      videoRef.current.play();
     }
   }, [selectedProject]);
 
