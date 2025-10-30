@@ -1,5 +1,5 @@
 // components/LocalVideo.tsx
-import React, { forwardRef, useState, useEffect } from 'react';
+import React, { forwardRef, useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 
@@ -41,6 +41,7 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
     const [isLoading, setIsLoading] = useState(true);
     const [hasError, setHasError] = useState(false);
     const [shouldLoad, setShouldLoad] = useState(!lazyLoad);
+    const [autoplayBlocked, setAutoplayBlocked] = useState(false);
     const { targetRef, isIntersecting, hasIntersected } = useIntersectionObserver({
       rootMargin: '200px',
       threshold: 0.1,
@@ -53,6 +54,27 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
       }
     }, [isIntersecting, hasIntersected, lazyLoad]);
 
+    // Attempt to play video with retry logic
+    const attemptPlay = useCallback((videoElement: HTMLVideoElement) => {
+      if (!videoElement || !autoplay) return;
+
+      const playPromise = videoElement.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setAutoplayBlocked(false);
+          })
+          .catch((error) => {
+            if (error.name === 'NotAllowedError' || error.name === 'NotSupportedError') {
+              console.log("Autoplay blocked by browser policy, waiting for user interaction:", error);
+              setAutoplayBlocked(true);
+            } else {
+              console.error("Video play error:", error);
+            }
+          });
+      }
+    }, [autoplay]);
+
     useEffect(() => {
       const videoElement = (ref as React.RefObject<HTMLVideoElement>)?.current;
       if (!videoElement || !shouldLoad) return;
@@ -62,17 +84,13 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
 
       const handleLoadedData = () => {
         setIsLoading(false);
-        if (autoplay) {
-          // Attempt to play with proper error handling
-          const playPromise = videoElement.play();
-          if (playPromise !== undefined) {
-            playPromise.catch((error) => {
-              console.log("Autoplay blocked, waiting for user interaction:", error);
-              // Don't set error state for autoplay policy violations
-              // Video will play when user interacts with it
-            });
-          }
-        }
+        // Attempt autoplay after video is loaded
+        attemptPlay(videoElement);
+      };
+
+      const handleCanPlay = () => {
+        // Additional attempt when video can play
+        attemptPlay(videoElement);
       };
 
       const handleError = () => {
@@ -81,6 +99,7 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
       };
 
       videoElement.addEventListener('loadeddata', handleLoadedData);
+      videoElement.addEventListener('canplay', handleCanPlay);
       videoElement.addEventListener('error', handleError);
 
       // Force reload when src changes
@@ -88,23 +107,50 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
 
       return () => {
         videoElement.removeEventListener('loadeddata', handleLoadedData);
+        videoElement.removeEventListener('canplay', handleCanPlay);
         videoElement.removeEventListener('error', handleError);
       };
-    }, [ref, src, autoplay, shouldLoad]);
+    }, [ref, src, shouldLoad, attemptPlay]);
 
-    const handleVideoClick = () => {
-      if (ref && 'current' in ref && ref.current && ref.current.paused && autoplay) {
-        ref.current.play().catch(error => {
-          console.log("Play failed on click:", error);
-        });
+    // Enhanced user interaction handler for autoplay fallback
+    const handleUserInteraction = useCallback(() => {
+      const videoElement = (ref as React.RefObject<HTMLVideoElement>)?.current;
+      if (videoElement && videoElement.paused && autoplay) {
+        attemptPlay(videoElement);
       }
-    };
+    }, [ref, autoplay, attemptPlay]);
+
+    // Set up global interaction listeners for autoplay retry
+    useEffect(() => {
+      if (!autoplayBlocked) return;
+
+      const videoElement = (ref as React.RefObject<HTMLVideoElement>)?.current;
+      if (!videoElement) return;
+
+      // Retry autoplay on any user interaction
+      const events = ['click', 'touchstart', 'keydown'];
+      const retryPlay = () => {
+        if (videoElement.paused) {
+          attemptPlay(videoElement);
+        }
+      };
+
+      events.forEach(event => {
+        document.addEventListener(event, retryPlay, { once: true, passive: true });
+      });
+
+      return () => {
+        events.forEach(event => {
+          document.removeEventListener(event, retryPlay);
+        });
+      };
+    }, [autoplayBlocked, ref, attemptPlay]);
 
     return (
       <div
         ref={targetRef as React.RefObject<HTMLDivElement>}
         className="relative w-full h-full"
-        onClick={handleVideoClick}
+        onClick={handleUserInteraction}
       >
         {/* Loading State with AnimeLoader */}
         {isLoading && shouldLoad && (
@@ -113,22 +159,54 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
           </div>
         )}
 
+        {/* Autoplay Blocked Indicator */}
+        {autoplayBlocked && !isLoading && (
+          <div
+            className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm rounded-2xl cursor-pointer z-10 transition-opacity duration-300 hover:bg-black/50"
+            onClick={handleUserInteraction}
+          >
+            <div className="text-center text-white">
+              <svg
+                className="mx-auto h-16 w-16 text-white drop-shadow-lg animate-pulse"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <p className="mt-2 text-sm drop-shadow-md">Click to play</p>
+            </div>
+          </div>
+        )}
+
         {/* Error State */}
         {hasError && !isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-red-500/20 via-red-400/10 to-transparent backdrop-blur-xl rounded-2xl border border-red-300/20">
             <div className="text-center text-white bg-gradient-to-br from-red-500/30 via-red-400/20 to-red-300/10 backdrop-blur-md rounded-xl p-6 border border-red-300/30">
-              <svg 
+              <svg
                 className="mx-auto h-12 w-12 text-red-300 drop-shadow-lg"
-                xmlns="http://www.w3.org/2000/svg" 
-                fill="none" 
-                viewBox="0 0 24 24" 
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
                 stroke="currentColor"
               >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" 
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                 />
               </svg>
               <p className="mt-2 text-white drop-shadow-md">Failed to load video</p>
@@ -137,7 +215,7 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
         )}
 
         {/* Video Element */}
-        {shouldLoad ? (
+        {shouldLoad && (src || lowResSrc) ? (
           <video
             ref={ref}
             key={src} // Force remount when src changes
@@ -149,8 +227,10 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
             className={`${className} rounded-2xl ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
             poster={poster}
             preload={lazyLoad ? "none" : preload}
-            playsInline
-            webkit-playsinline="true"
+            playsInline={true}
+            disablePictureInPicture
+            controlsList="nodownload"
+            crossOrigin="anonymous"
           >
             Your browser does not support the video tag.
           </video>
