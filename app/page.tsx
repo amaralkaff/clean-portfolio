@@ -44,10 +44,12 @@ const Home = () => {
   const { modalVisible } = state;
   const { setModalVisible } = actions;
   const { theme } = useTheme();
-  
+
   // Track if hovering over the main app area
   const [isHoveringApp, setIsHoveringApp] = useState(false);
   const [deferredComponentsLoaded, setDeferredComponentsLoaded] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const [showContent, setShowContent] = useState(false);
   const appFadeOutTimer = useRef<NodeJS.Timeout | null>(null);
 
   // Cleanup timer on unmount
@@ -58,6 +60,22 @@ const Home = () => {
       }
     };
   }, []);
+
+  // Two-pass rendering: prevent hydration mismatch
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Show content after mount to display loading animation
+  useEffect(() => {
+    if (isMounted) {
+      const timer = setTimeout(() => {
+        setShowContent(true);
+      }, 1500); // Show loading for 1.5s
+
+      return () => clearTimeout(timer);
+    }
+  }, [isMounted]);
 
   // Defer loading of non-critical components
   useEffect(() => {
@@ -99,24 +117,34 @@ const Home = () => {
 
 
   return (
-    <div 
-      className="flex flex-col md:flex-row justify-center items-center min-h-screen pt-14 md:pt-0"
-      onMouseEnter={() => {
-        // Cancel any pending fade out when entering the app area
-        if (appFadeOutTimer.current) {
-          clearTimeout(appFadeOutTimer.current);
-          appFadeOutTimer.current = null;
-        }
-        setIsHoveringApp(true);
-      }}
-      onMouseLeave={() => {
-        // Add delay before deactivating circuit when leaving the entire app
-        appFadeOutTimer.current = setTimeout(() => {
-          setIsHoveringApp(false);
-        }, 1500); // 1.5 second delay when leaving the entire app area
-      }}
-    >
-      <ThemeToggle />
+    <>
+      {/* Show loading screen until content ready */}
+      {isMounted && !showContent && (
+        <div className="flex items-center justify-center min-h-screen">
+          <AnimeLoader />
+        </div>
+      )}
+
+      {/* Show main content after loading */}
+      {(!isMounted || showContent) && (
+        <div
+          className="flex flex-col md:flex-row justify-center items-center min-h-screen pt-14 md:pt-0"
+          onMouseEnter={() => {
+            // Cancel any pending fade out when entering the app area
+            if (appFadeOutTimer.current) {
+              clearTimeout(appFadeOutTimer.current);
+              appFadeOutTimer.current = null;
+            }
+            setIsHoveringApp(true);
+          }}
+          onMouseLeave={() => {
+            // Add delay before deactivating circuit when leaving the entire app
+            appFadeOutTimer.current = setTimeout(() => {
+              setIsHoveringApp(false);
+            }, 1500); // 1.5 second delay when leaving the entire app area
+          }}
+        >
+          <ThemeToggle />
       
       {/* Critical Content - Always Load */}
       <Suspense fallback={<AnimeLoader />}>
@@ -144,10 +172,12 @@ const Home = () => {
         </div>
       </Suspense>
       
-      <Footer />
-      <PhonkMusicPlayer autoPlay={true} />
-      <PerformanceMonitor />
-    </div>
+          <Footer />
+          <PhonkMusicPlayer autoPlay={true} />
+          <PerformanceMonitor />
+        </div>
+      )}
+    </>
   );
 };
 

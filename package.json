@@ -11,7 +11,7 @@
     "perf": "npm run build && npm run analyze"
   },
   "dependencies": {
-    "@tailwindcss/postcss": "^4.1.16",
+    "@tailwindcss/postcss": "^4.1.17",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
     "animejs": "^4.2.2",
@@ -27,14 +27,14 @@
   "devDependencies": {
     "@next/bundle-analyzer": "^15.5.6",
     "@types/next": "^9.0.0",
-    "@types/node": "^22.18.12",
-    "@types/react": "^19.2.2",
-    "@types/react-dom": "^19.2.2",
+    "@types/node": "^22.19.1",
+    "@types/react": "^19.2.6",
+    "@types/react-dom": "^19.2.3",
     "cross-env": "^7.0.3",
-    "eslint": "^9.38.0",
+    "eslint": "^9.39.1",
     "eslint-config-next": "15.1.7",
     "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.16",
+    "tailwindcss": "^4.1.17",
     "typescript": "^5.9.3"
   }
 }

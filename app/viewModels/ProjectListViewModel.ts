@@ -1,22 +1,18 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { projects, Project } from '../models/ProjectData';
 
 export interface ProjectListState {
   selectedProject: number | null;
   isMobile: boolean;
   isActive: boolean;
   isVideoLoading: boolean;
-  projects: Project[];
-  isDataLoaded: boolean;
 }
 
 export interface ProjectListActions {
   handleInteraction: (index: number) => Promise<void>;
   closeModal: () => void;
   setIsActive: (isActive: boolean) => void;
-  loadProjectData: () => void;
 }
 
 export function useProjectListViewModel(
@@ -26,8 +22,6 @@ export function useProjectListViewModel(
   const [isMobile, setIsMobile] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [isVideoLoading, setIsVideoLoading] = useState(false);
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
-  const [projectsData, setProjectsData] = useState<Project[]>([]);
   const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -40,17 +34,6 @@ export function useProjectListViewModel(
     window.addEventListener("resize", updateMedia);
     return () => window.removeEventListener("resize", updateMedia);
   }, []);
-
-  // Load project data when needed
-  const loadProjectData = useCallback(() => {
-    if (!isDataLoaded) {
-      // Simulate loading delay for heavy data
-      setTimeout(() => {
-        setProjectsData(projects);
-        setIsDataLoaded(true);
-      }, 100);
-    }
-  }, [isDataLoaded]);
 
   const closeModal = useCallback(() => {
     setSelectedProject(null);
@@ -90,7 +73,7 @@ export function useProjectListViewModel(
 
   useEffect(() => {
     if (!isActive && selectedProject !== null) {
-      closeTimerRef.current = setTimeout(closeModal, 200);
+      closeTimerRef.current = setTimeout(closeModal, 500);
     }
     return () => {
       if (closeTimerRef.current) {
@@ -99,25 +82,17 @@ export function useProjectListViewModel(
     };
   }, [isActive, closeModal, selectedProject]);
 
-  // Set videoRef for external access
-  const setVideoRefExternal = (ref: HTMLVideoElement | null) => {
-    videoRef.current = ref;
-  };
-
   return [
-    { 
-      selectedProject, 
-      isMobile, 
-      isActive, 
-      isVideoLoading,
-      projects: isDataLoaded ? projectsData : projects.map(p => ({ ...p, name: p.name, year: p.year, techStack: [], video: '' })), // Only show basic info until loaded
-      isDataLoaded 
+    {
+      selectedProject,
+      isMobile,
+      isActive,
+      isVideoLoading
     },
     {
       handleInteraction,
       closeModal,
-      setIsActive,
-      loadProjectData
+      setIsActive
     }
   ];
 } 

@@ -15,13 +15,40 @@ export interface Project {
 
 export const projects: Project[] = [
   {
+    name: "Palepale Keyboards",
+    year: 2025,
+    video: "/video/palepale-keyboards.webm",
+    techStack: [
+      {
+        name: "NextJS",
+        logo: "/logos/nextjs.svg",
+        url: "https://nextjs.org",
+      },
+      {
+        name: "GSAP",
+        logo: "/logos/gsap.svg",
+        url: "https://greensock.com/gsap",
+      },
+      {
+        name: "ThreeJS",
+        logo: "/logos/threejs.svg",
+        url: "https://threejs.org",
+      },
+      {
+        name: "Stripe",
+        logo: "/logos/stripe.svg",
+        url: "https://stripe.com",
+      },
+    ],
+  },
+  {
     name: "LSA Course",
     year: 2025,
     video: "/video/lsa-course.webm",
     techStack: [
       {
         name: "NextJS",
-        logo: "/logos/nextjs.png",
+        logo: "/logos/nextjs.svg",
         url: "https://nextjs.org",
       },
       {
@@ -36,7 +63,7 @@ export const projects: Project[] = [
       },
       {
         name: "ThreeJS",
-        logo: "/logos/threejs.png",
+        logo: "/logos/threejs.svg",
         url: "https://threejs.org",
       },
     ],
@@ -161,7 +188,7 @@ export const projects: Project[] = [
     techStack: [
       {
         name: "NextJS",
-        logo: "/logos/nextjs.png",
+        logo: "/logos/nextjs.svg",
         url: "https://nextjs.org",
       },
       {
@@ -188,4 +215,4 @@ export const projects: Project[] = [
   },
 ];
 
-export default projects; 
+export default projects;

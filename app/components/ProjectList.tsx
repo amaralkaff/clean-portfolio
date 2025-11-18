@@ -11,7 +11,7 @@ import Link from "next/link";
 import ProgressiveImage from "./ProgressiveImage";
 import CircuitAnimation from "./CircuitAnimation";
 import { useProjectListViewModel } from "../viewModels/ProjectListViewModel";
-import { Project } from "../models/ProjectData";
+import { projects } from "../models/ProjectData";
 import { useTheme } from "../context/ThemeContext";
 
 const LocalVideo = React.lazy(() => import("./LocalVideo"));
@@ -39,10 +39,10 @@ const ProjectList: React.FC<ProjectListProps> = ({
   const projectRefs = useRef<(HTMLDivElement | null)[]>([]);
   
   const [state, actions] = useProjectListViewModel(onModalToggle);
-  const { selectedProject, isMobile, isActive, projects, isDataLoaded } = state;
-  const { handleInteraction, closeModal, setIsActive, loadProjectData } = actions;
+  const { selectedProject, isMobile, isActive } = state;
+  const { handleInteraction, closeModal, setIsActive } = actions;
   const { theme } = useTheme();
-  
+
   // Track which project is being hovered
   const [hoveredProjectIndex, setHoveredProjectIndex] = React.useState<number | null>(null);
   // Track if hovering over project list area specifically
@@ -69,13 +69,10 @@ const ProjectList: React.FC<ProjectListProps> = ({
         onMouseEnter={() => {
           setIsActive(true);
           setIsHoveringProjectList(true);
-          // Load project data on first hover
-          if (shouldLoadData && !isDataLoaded) {
-            loadProjectData();
-          }
         }}
         onMouseLeave={() => {
           setIsHoveringProjectList(false);
+          setIsActive(false);
         }}
       >
         {projects.map((project, index) => (
@@ -135,7 +132,8 @@ const ProjectList: React.FC<ProjectListProps> = ({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 10 }}
           transition={{ duration: 0.2 }}
-          onMouseLeave={closeModal}
+          onMouseEnter={() => setIsActive(true)}
+          onMouseLeave={() => setIsActive(false)}
         >
           <button
             className={`fixed top-16 md:top-6 right-3 rounded-full p-2 z-50 md:hidden transition-all duration-300 backdrop-blur-lg border ${
@@ -200,16 +198,16 @@ const ProjectList: React.FC<ProjectListProps> = ({
                 preload="auto"
               />
             </div>
-            <div className="flex flex-wrap justify-center mt-4">
+            <div className="flex flex-wrap justify-center mt-4 gap-4">
               {projects[selectedProject]?.techStack.map((tech, index) => (
-                <div key={index} className="flex items-center m-2">
+                <div key={index} className="flex items-center gap-2">
                   <Link href={tech.url} passHref target="_blank" rel="noopener noreferrer">
                     <ProgressiveImage
                       src={tech.logo}
                       alt={tech.name}
                       width={30}
                       height={30}
-                      className="mr-2 hover:opacity-80 transition-opacity duration-200"
+                      className="hover:opacity-80 transition-opacity duration-200"
                       lazyLoad={true}
                     />
                   </Link>

@@ -58,7 +58,7 @@ const AssetLoader: React.FC<{ onLoadComplete: () => void }> = ({ onLoadComplete 
       '/logos/socket.png',
       '/logos/googlemap.png',
       '/logos/javascript.png',
-      '/logos/nextjs.png',
+      '/logos/nextjs.svg',
       '/logos/mongodb.png',
       '/logos/xendit.png',
       '/logos/openai.png'
