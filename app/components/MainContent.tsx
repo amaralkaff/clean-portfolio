@@ -4,7 +4,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import PDFViewerModal from "./PDFViewerModal";
-import GradientText from "./GradientText";
+import ShinyText from "./ShinyText";
 import BlurText from "./BlurText";
 import { useMainContentViewModel } from "../viewModels/MainContentViewModel";
 import { useTheme } from "../context/ThemeContext";
@@ -62,12 +62,11 @@ const MainContent: React.FC<MainContentProps> = ({ isVisible }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.6 }}
           >
-            <GradientText
-              animationSpeed={5}
-              className="text-lg font-bold"
-            >
-              {personalInfo.name}
-            </GradientText>
+            <ShinyText
+              text={personalInfo.name}
+              speed={5}
+              className="text-lg font-bold text-[var(--text-primary)]"
+            />
             <BlurText
               text={personalInfo.tagline}
               className="text-[var(--text-secondary)] text-lg"
