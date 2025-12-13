@@ -7,7 +7,7 @@ import { useTheme } from "./context/ThemeContext";
 import dynamic from "next/dynamic";
 
 // Strategic component loading - Critical first, secondary on demand
-const AnimeLoader = dynamic(() => import("./components/AnimeLoader"), {
+const AssetLoader = dynamic(() => import("./components/AssetLoader"), {
   ssr: false
 });
 
@@ -20,7 +20,7 @@ const Noise = dynamic(() => import("./components/Noise"), {
 // Critical components - Load immediately
 const MainContent = dynamic(() => import("./components/MainContent"), {
   ssr: false,
-  loading: () => <AnimeLoader />
+  loading: () => null
 });
 const ThemeToggle = dynamic(() => import("./components/ThemeToggle"), {
   ssr: false
@@ -29,7 +29,7 @@ const ThemeToggle = dynamic(() => import("./components/ThemeToggle"), {
 // Secondary components - Load conditionally
 const ProjectList = dynamic(() => import("./components/ProjectList"), {
   ssr: false,
-  loading: () => <AnimeLoader />
+  loading: () => null
 });
 
 // Deferred components - Load after critical path
@@ -72,17 +72,6 @@ const Home = () => {
     setIsMounted(true);
   }, []);
 
-  // Show content after mount to display loading animation
-  useEffect(() => {
-    if (isMounted) {
-      const timer = setTimeout(() => {
-        setShowContent(true);
-      }, 1500); // Show loading for 1.5s
-
-      return () => clearTimeout(timer);
-    }
-  }, [isMounted]);
-
   // Defer loading of non-critical components
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -124,26 +113,22 @@ const Home = () => {
 
   return (
     <>
-      {/* Noise Background - only render after mount to avoid hydration mismatch */}
-      {isMounted && (
-        <Noise
-          patternSize={250}
-          patternScaleX={1}
-          patternScaleY={1}
-          patternRefreshInterval={2}
-          patternAlpha={15}
-        />
-      )}
-
-      {/* Show loading screen until content ready */}
+      {/* Show loading screen until assets are loaded */}
       {isMounted && !showContent && (
-        <div className="flex items-center justify-center min-h-screen">
-          <AnimeLoader />
-        </div>
+        <AssetLoader onLoadComplete={() => setShowContent(true)} />
       )}
 
       {/* Show main content after loading */}
-      {(!isMounted || showContent) && (
+      {isMounted && showContent && (
+        <>
+          {/* Noise Background */}
+          <Noise
+            patternSize={250}
+            patternScaleX={1}
+            patternScaleY={1}
+            patternRefreshInterval={2}
+            patternAlpha={15}
+          />
         <div
           className="flex flex-col md:flex-row justify-center items-center min-h-screen pt-14 md:pt-0"
           onMouseEnter={() => {
@@ -164,7 +149,7 @@ const Home = () => {
           <ThemeToggle />
       
       {/* Critical Content - Always Load */}
-      <Suspense fallback={<AnimeLoader />}>
+      <Suspense fallback={null}>
         <div
           className={`order-1 md:order-2 w-full md:w-1/2 transition-all duration-500 ${
             modalVisible ? "hidden md:block" : ""
@@ -175,7 +160,7 @@ const Home = () => {
       </Suspense>
 
       {/* ProjectList - Always visible, data loads on hover */}
-      <Suspense fallback={<AnimeLoader />}>
+      <Suspense fallback={null}>
         <div
           className={`order-2 md:order-1 w-full md:w-1/2 h-screen overflow-auto transition-all duration-500 ${
             modalVisible ? "md:w-full" : ""
@@ -193,6 +178,7 @@ const Home = () => {
           <PhonkMusicPlayer autoPlay={true} />
           <PerformanceMonitor />
         </div>
+        </>
       )}
     </>
   );

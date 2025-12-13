@@ -5,39 +5,45 @@ import Noise from './Noise';
 import CountUp from './CountUp';
 import { useTheme } from '../context/ThemeContext';
 
-const loadImages = async (imageUrls: string[]): Promise<string[]> => {
-  const loadImage = (url: string): Promise<void> => {
+const loadImages = async (
+  imageUrls: string[],
+  onProgress: (loaded: number, total: number) => void
+): Promise<string[]> => {
+  const loadImage = (url: string): Promise<boolean> => {
     return new Promise((resolve) => {
       const img = new Image();
-      
+
       const handleLoad = () => {
         img.removeEventListener('load', handleLoad);
         img.removeEventListener('error', handleError);
-        resolve();
+        resolve(true);
       };
 
       const handleError = () => {
         console.error(`Failed to load image: ${url}`);
         img.removeEventListener('load', handleLoad);
         img.removeEventListener('error', handleError);
-        resolve(); // Resolve instead of reject to continue loading other images
+        resolve(false);
       };
 
       img.addEventListener('load', handleLoad);
       img.addEventListener('error', handleError);
-      
+
       // Add cache busting parameter to prevent caching issues
       img.src = `${url}?t=${Date.now()}`;
     });
   };
 
   const failedUrls: string[] = [];
+  let loadedCount = 0;
+
   for (const url of imageUrls) {
-    try {
-      await loadImage(url);
-    } catch {
+    const success = await loadImage(url);
+    if (!success) {
       failedUrls.push(url);
     }
+    loadedCount++;
+    onProgress(loadedCount, imageUrls.length);
   }
   return failedUrls;
 };
@@ -69,35 +75,32 @@ const AssetLoader: React.FC<{ onLoadComplete: () => void }> = ({ onLoadComplete 
     let mounted = true;
 
     const load = async () => {
-      // Start loading animation
-      let currentProgress = 0;
-      const progressInterval = setInterval(() => {
-        if (mounted && currentProgress < 90) {
-          currentProgress += 10;
-          setProgress(currentProgress);
-        }
-      }, 100);
-
       try {
-        const failedUrls = await loadImages(logoUrls);
-        
+        const failedUrls = await loadImages(logoUrls, (loaded, total) => {
+          if (mounted) {
+            const percentage = Math.round((loaded / total) * 100);
+            setProgress(percentage);
+          }
+        });
+
         if (mounted) {
           setFailedImages(failedUrls);
-          
+
           if (failedUrls.length > 0 && retryCount < maxRetries) {
             console.log(`Retrying failed images (attempt ${retryCount + 1}/${maxRetries})`);
-            setRetryCount(prev => prev + 1);
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
+            setRetryCount((prev) => prev + 1);
+            await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1 second before retry
             await load(); // Retry loading
             return;
           }
+
+          setTimeout(() => {
+            onLoadComplete();
+          }, 500);
         }
       } catch (error) {
         console.error('Error during image loading:', error);
-      } finally {
         if (mounted) {
-          clearInterval(progressInterval);
-          setProgress(100);
           setTimeout(() => {
             onLoadComplete();
           }, 500);
