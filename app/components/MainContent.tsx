@@ -63,7 +63,6 @@ const MainContent: React.FC<MainContentProps> = ({ isVisible }) => {
             transition={{ delay: 0.2, duration: 0.6 }}
           >
             <GradientText
-              colors={['#40ffaa', '#4079ff', '#40ffaa', '#4079ff', '#40ffaa']}
               animationSpeed={5}
               className="text-lg font-bold mb-2"
             >
