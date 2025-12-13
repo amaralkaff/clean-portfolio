@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import ProgressiveImage from "./ProgressiveImage";
 import CircuitAnimation from "./CircuitAnimation";
+import ShinyText from "./ShinyText";
 import { useProjectListViewModel } from "../viewModels/ProjectListViewModel";
 import { projects } from "../models/ProjectData";
 import { useTheme } from "../context/ThemeContext";
@@ -104,9 +105,13 @@ const ProjectList: React.FC<ProjectListProps> = ({
                 : 'hover:bg-white/[0.15] border border-transparent hover:border-gray/30 hover:backdrop-blur-xl hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] before:from-gray/[0.08] before:via-gray/[0.03] before:to-transparent after:from-transparent after:via-black/15 after:to-transparent'
             }`}
           >
-            <span className="relative z-10 text-[var(--text-primary)] text-md font-medium w-1/2 truncate transition-all duration-300 group-hover:text-opacity-90 group-hover:drop-shadow-sm">
-              {project.name}
-            </span>
+            <div className="relative z-10 w-1/2 truncate">
+              <ShinyText
+                text={project.name}
+                speed={3}
+                className="text-md font-medium transition-all duration-300 group-hover:text-opacity-90 group-hover:drop-shadow-sm"
+              />
+            </div>
             <span className="relative z-10 text-gray-400 text-sm md:text-base w-1/4 text-right transition-all duration-300 group-hover:text-opacity-80 group-hover:drop-shadow-sm">
               {project.year}
             </span>
