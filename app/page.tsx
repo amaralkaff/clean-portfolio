@@ -7,8 +7,14 @@ import { useTheme } from "./context/ThemeContext";
 import dynamic from "next/dynamic";
 
 // Strategic component loading - Critical first, secondary on demand
-const AnimeLoader = dynamic(() => import("./components/AnimeLoader"), { 
+const AnimeLoader = dynamic(() => import("./components/AnimeLoader"), {
   ssr: false
+});
+
+// Background effects
+const Noise = dynamic(() => import("./components/Noise"), {
+  ssr: false,
+  loading: () => null
 });
 
 // Critical components - Load immediately
@@ -118,6 +124,17 @@ const Home = () => {
 
   return (
     <>
+      {/* Noise Background - only render after mount to avoid hydration mismatch */}
+      {isMounted && (
+        <Noise
+          patternSize={250}
+          patternScaleX={1}
+          patternScaleY={1}
+          patternRefreshInterval={2}
+          patternAlpha={15}
+        />
+      )}
+
       {/* Show loading screen until content ready */}
       {isMounted && !showContent && (
         <div className="flex items-center justify-center min-h-screen">

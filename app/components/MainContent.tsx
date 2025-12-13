@@ -4,6 +4,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import PDFViewerModal from "./PDFViewerModal";
+import TextType from "./TextType";
 import { useMainContentViewModel } from "../viewModels/MainContentViewModel";
 import { useTheme } from "../context/ThemeContext";
 
@@ -54,15 +55,29 @@ const MainContent: React.FC<MainContentProps> = ({ isVisible }) => {
         }}
       >
         <div className="text-center" data-text-content style={{ textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-          <motion.div 
+          <motion.div
             className="text-lg font-bold"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.6 }}
           >
-            <span className="text-[var(--text-primary)]">{personalInfo.name}</span>
+            <TextType
+              text={personalInfo.name}
+              className="text-[var(--text-primary)]"
+              typingSpeed={100}
+              showCursor={false}
+              loop={false}
+            />
             <br />
-            <span className="text-[var(--text-secondary)]">{personalInfo.tagline}</span>
+            <TextType
+              text={personalInfo.tagline}
+              className="text-[var(--text-secondary)]"
+              typingSpeed={75}
+              initialDelay={personalInfo.name.length * 100}
+              showCursor={true}
+              cursorCharacter="|"
+              loop={false}
+            />
           </motion.div>
           <motion.div 
             className="mt-2 space-x-4 text-[var(--text-secondary)]"
