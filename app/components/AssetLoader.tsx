@@ -1,6 +1,8 @@
 // File: app/components/AssetLoader.tsx
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import Noise from './Noise';
+import CountUp from './CountUp';
 import { useTheme } from '../context/ThemeContext';
 
 const loadImages = async (imageUrls: string[]): Promise<string[]> => {
@@ -117,22 +119,20 @@ const AssetLoader: React.FC<{ onLoadComplete: () => void }> = ({ onLoadComplete 
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="w-64 h-2 bg-gray-200 rounded-full overflow-hidden">
-        <motion.div
-          className={`h-full ${theme === 'dark' ? 'bg-white' : 'bg-black'}`}
-          initial={{ width: 0 }}
-          animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.3 }}
+      <Noise patternAlpha={theme === 'dark' ? 8 : 15} />
+      <div className="relative z-10 flex flex-col items-center">
+        <CountUp
+          to={progress}
+          duration={0.3}
+          className={`text-6xl font-bold ${theme === 'dark' ? 'text-white' : 'text-black'}`}
         />
-      </div>
-      <span className={`mt-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-        Loading assets... {progress}%
+        <span className={`text-2xl mt-2 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>%</span>
         {failedImages.length > 0 && retryCount < maxRetries && (
-          <span className={`block text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`}>
-            Retrying failed images... ({retryCount + 1}/{maxRetries})
+          <span className={`mt-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+            Retrying... ({retryCount + 1}/{maxRetries})
           </span>
         )}
-      </span>
+      </div>
     </motion.div>
   );
 };
