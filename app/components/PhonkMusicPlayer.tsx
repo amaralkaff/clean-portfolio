@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Play, Pause, SkipForward, Minimize2 } from 'lucide-react';
+import { Play, Pause, SkipForward, Minimize2, Volume2, VolumeX } from 'lucide-react';
 import { usePhonkMusicViewModel } from '../viewModels/PhonkMusicViewModel';
 import { useTheme } from '../context/ThemeContext';
+import ElasticSlider from './ElasticSlider';
 
 interface PhonkMusicPlayerProps {
   autoPlay?: boolean;
@@ -21,7 +22,15 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
   const [visualizerBars, setVisualizerBars] = useState([0.3, 0.8, 0.5]);
   const [pulseAnimation, setPulseAnimation] = useState(false);
   const [hasTriggeredOnce, setHasTriggeredOnce] = useState(false);
+  const [volume, setVolume] = useState(70);
   const { theme } = useTheme();
+
+  // Update audio volume when volume state changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume / 100;
+    }
+  }, [volume, audioRef]);
 
   // Audio setup with one-time trigger on first user interaction
   useEffect(() => {
@@ -159,14 +168,28 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
             {isPlaying ? <Pause size={18} className={theme === 'dark' ? 'text-white' : ''} /> : <Play size={18} className={theme === 'dark' ? 'text-white' : ''} />}
           </button>
 
-          <div className="flex flex-col w-48 items-center">
-            <div className={`text-xs font-medium truncate text-center w-full ${theme === 'dark' ? 'text-white' : ''}`}>
-              {isLoading ? 'Loading...' : error || tracks[currentTrack].name}
+          <div className="flex flex-col items-center space-y-2">
+            <div className="flex flex-col w-48 items-center">
+              <div className={`text-xs font-medium truncate text-center w-full ${theme === 'dark' ? 'text-white' : ''}`}>
+                {isLoading ? 'Loading...' : error || tracks[currentTrack].name}
+              </div>
+              <div className={`w-full h-1 rounded-full mt-1 overflow-hidden backdrop-blur-sm ${theme === 'dark' ? 'bg-white/20' : 'bg-black/20'}`}>
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ease-out bg-gradient-to-r ${theme === 'dark' ? 'from-blue-400 via-purple-400 to-pink-400' : 'from-blue-600 via-purple-600 to-pink-600'} shadow-sm`}
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
             </div>
-            <div className={`w-full h-1 rounded-full mt-1 overflow-hidden backdrop-blur-sm ${theme === 'dark' ? 'bg-white/20' : 'bg-black/20'}`}>
-              <div 
-                className={`h-full rounded-full transition-all duration-500 ease-out bg-gradient-to-r ${theme === 'dark' ? 'from-blue-400 via-purple-400 to-pink-400' : 'from-blue-600 via-purple-600 to-pink-600'} shadow-sm`}
-                style={{ width: `${progress}%` }}
+            <div className="w-32">
+              <ElasticSlider
+                defaultValue={volume}
+                startingValue={0}
+                maxValue={100}
+                isStepped={true}
+                stepSize={5}
+                leftIcon={<VolumeX size={14} className={theme === 'dark' ? 'text-white' : 'text-black'} />}
+                rightIcon={<Volume2 size={14} className={theme === 'dark' ? 'text-white' : 'text-black'} />}
+                onChange={setVolume}
               />
             </div>
           </div>
