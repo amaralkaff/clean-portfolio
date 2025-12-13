@@ -4,7 +4,8 @@ import React from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import PDFViewerModal from "./PDFViewerModal";
-import TextType from "./TextType";
+import GradientText from "./GradientText";
+import BlurText from "./BlurText";
 import { useMainContentViewModel } from "../viewModels/MainContentViewModel";
 import { useTheme } from "../context/ThemeContext";
 
@@ -61,22 +62,20 @@ const MainContent: React.FC<MainContentProps> = ({ isVisible }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.6 }}
           >
-            <TextType
-              text={personalInfo.name}
-              className="text-[var(--text-primary)]"
-              typingSpeed={100}
-              showCursor={false}
-              loop={false}
-            />
+            <GradientText
+              colors={['#40ffaa', '#4079ff', '#40ffaa', '#4079ff', '#40ffaa']}
+              animationSpeed={5}
+              className="text-lg font-bold mb-2"
+            >
+              {personalInfo.name}
+            </GradientText>
             <br />
-            <TextType
+            <BlurText
               text={personalInfo.tagline}
-              className="text-[var(--text-secondary)]"
-              typingSpeed={75}
-              initialDelay={personalInfo.name.length * 100}
-              showCursor={true}
-              cursorCharacter="|"
-              loop={false}
+              className="text-[var(--text-secondary)] text-lg"
+              delay={50}
+              animateBy="words"
+              direction="top"
             />
           </motion.div>
           <motion.div 
