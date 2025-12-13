@@ -64,11 +64,10 @@ const MainContent: React.FC<MainContentProps> = ({ isVisible }) => {
           >
             <GradientText
               animationSpeed={5}
-              className="text-lg font-bold mb-2"
+              className="text-lg font-bold"
             >
               {personalInfo.name}
             </GradientText>
-            <br />
             <BlurText
               text={personalInfo.tagline}
               className="text-[var(--text-secondary)] text-lg"
