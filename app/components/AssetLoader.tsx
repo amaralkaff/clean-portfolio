@@ -126,7 +126,7 @@ const AssetLoader: React.FC<{ onLoadComplete: () => void }> = ({ onLoadComplete 
       <div className="relative z-10 flex flex-col items-center">
         <CountUp
           to={progress}
-          duration={0.3}
+          duration={0.1}
           className={`text-6xl font-bold ${theme === 'dark' ? 'text-white' : 'text-black'}`}
         />
         <span className={`text-2xl mt-2 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>%</span>
