@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Noise from './Noise';
-import CountUp from './CountUp';
 import { useTheme } from '../context/ThemeContext';
 
 const loadImages = async (
@@ -124,11 +123,9 @@ const AssetLoader: React.FC<{ onLoadComplete: () => void }> = ({ onLoadComplete 
     >
       <Noise patternAlpha={theme === 'dark' ? 8 : 15} />
       <div className="relative z-10 flex flex-col items-center">
-        <CountUp
-          to={progress}
-          duration={0.01}
-          className={`text-6xl font-bold ${theme === 'dark' ? 'text-white' : 'text-black'}`}
-        />
+        <span className={`text-6xl font-bold ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
+          {progress}
+        </span>
         <span className={`text-2xl mt-2 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>%</span>
         {failedImages.length > 0 && retryCount < maxRetries && (
           <span className={`mt-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
