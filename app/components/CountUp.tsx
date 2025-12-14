@@ -31,8 +31,9 @@ export default function CountUp({
   const ref = useRef<HTMLSpanElement>(null);
   const motionValue = useMotionValue(direction === 'down' ? to : from);
 
-  const damping = 20 + 40 * (1 / duration);
-  const stiffness = 100 * (1 / duration);
+  // Fast, snappy spring settings for quick counting
+  const damping = 15;
+  const stiffness = 200;
 
   const springValue = useSpring(motionValue, {
     damping,
