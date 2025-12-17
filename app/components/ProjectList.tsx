@@ -178,6 +178,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
                   loop={true}
                   className="w-full h-full rounded-2xl object-cover relative z-0"
                   preload="auto"
+                  lazyLoad={false}
                 />
               </div>
               <div className="flex flex-wrap justify-center mt-4 gap-4">

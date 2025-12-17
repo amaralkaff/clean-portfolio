@@ -73,6 +73,11 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
       setIsLoading(true);
       setHasError(false);
 
+      if (muted) {
+        videoElement.defaultMuted = true;
+        videoElement.muted = true;
+      }
+
       const handleLoadedData = () => {
         setIsLoading(false);
         // Attempt autoplay after video is loaded
