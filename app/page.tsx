@@ -7,9 +7,7 @@ import { useTheme } from "./context/ThemeContext";
 import dynamic from "next/dynamic";
 
 // Strategic component loading - Critical first, secondary on demand
-const AssetLoader = dynamic(() => import("./components/AssetLoader"), {
-  ssr: false
-});
+
 
 // Background effects
 const Noise = dynamic(() => import("./components/Noise"), {
@@ -55,7 +53,7 @@ const Home = () => {
   const [isHoveringApp, setIsHoveringApp] = useState(false);
   const [deferredComponentsLoaded, setDeferredComponentsLoaded] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const [showContent, setShowContent] = useState(false);
+
   const appFadeOutTimer = useRef<NodeJS.Timeout | null>(null);
 
   // Cleanup timer on unmount
@@ -84,11 +82,11 @@ const Home = () => {
   // Deferred audio context initialization to reduce main thread blocking
   useEffect(() => {
     let audioInitialized = false;
-    
+
     const enableAudioOnInteraction = () => {
       if (audioInitialized) return;
       audioInitialized = true;
-      
+
       // Use setTimeout to defer audio context creation off main thread
       setTimeout(async () => {
         try {
@@ -101,10 +99,10 @@ const Home = () => {
         }
       }, 0);
     };
-    
+
     // Single interaction listener for audio context
     document.addEventListener('click', enableAudioOnInteraction, { once: true, passive: true });
-    
+
     return () => {
       document.removeEventListener('click', enableAudioOnInteraction);
     };
@@ -114,12 +112,7 @@ const Home = () => {
   return (
     <>
       {/* Show loading screen until assets are loaded */}
-      {isMounted && !showContent && (
-        <AssetLoader onLoadComplete={() => setShowContent(true)} />
-      )}
-
-      {/* Show main content after loading */}
-      {isMounted && showContent && (
+      {isMounted && (
         <>
           {/* Noise Background */}
           <Noise
@@ -129,55 +122,53 @@ const Home = () => {
             patternRefreshInterval={2}
             patternAlpha={15}
           />
-        <div
-          className="flex flex-col md:flex-row justify-center items-center min-h-screen pt-14 md:pt-0"
-          onMouseEnter={() => {
-            // Cancel any pending fade out when entering the app area
-            if (appFadeOutTimer.current) {
-              clearTimeout(appFadeOutTimer.current);
-              appFadeOutTimer.current = null;
-            }
-            setIsHoveringApp(true);
-          }}
-          onMouseLeave={() => {
-            // Add delay before deactivating circuit when leaving the entire app
-            appFadeOutTimer.current = setTimeout(() => {
-              setIsHoveringApp(false);
-            }, 1500); // 1.5 second delay when leaving the entire app area
-          }}
-        >
-          <ThemeToggle />
-      
-      {/* Critical Content - Always Load */}
-      <Suspense fallback={null}>
-        <div
-          className={`order-1 md:order-2 w-full md:w-1/2 transition-all duration-500 ${
-            modalVisible ? "hidden md:block" : ""
-          }`}
-        >
-          <MainContent isVisible={!modalVisible} priority={true} />
-        </div>
-      </Suspense>
+          <div
+            className="flex flex-col md:flex-row justify-center items-center min-h-screen pt-14 md:pt-0"
+            onMouseEnter={() => {
+              // Cancel any pending fade out when entering the app area
+              if (appFadeOutTimer.current) {
+                clearTimeout(appFadeOutTimer.current);
+                appFadeOutTimer.current = null;
+              }
+              setIsHoveringApp(true);
+            }}
+            onMouseLeave={() => {
+              // Add delay before deactivating circuit when leaving the entire app
+              appFadeOutTimer.current = setTimeout(() => {
+                setIsHoveringApp(false);
+              }, 1500); // 1.5 second delay when leaving the entire app area
+            }}
+          >
+            <ThemeToggle />
 
-      {/* ProjectList - Always visible, data loads on hover */}
-      <Suspense fallback={null}>
-        <div
-          className={`order-2 md:order-1 w-full md:w-1/2 h-screen overflow-auto transition-all duration-500 ${
-            modalVisible ? "md:w-full" : ""
-          }`}
-        >
-          <ProjectList 
-            onModalToggle={setModalVisible} 
-            isAppHovered={isHoveringApp}
-            shouldLoadData={isHoveringApp} 
-          />
-        </div>
-      </Suspense>
-      
-          <Footer />
-          <PhonkMusicPlayer autoPlay={true} />
-          <PerformanceMonitor />
-        </div>
+            {/* Critical Content - Always Load */}
+            <Suspense fallback={null}>
+              <div
+                className={`order-1 md:order-2 w-full md:w-1/2 transition-all duration-500 ${modalVisible ? "hidden md:block" : ""
+                  }`}
+              >
+                <MainContent isVisible={!modalVisible} priority={true} />
+              </div>
+            </Suspense>
+
+            {/* ProjectList - Always visible, data loads on hover */}
+            <Suspense fallback={null}>
+              <div
+                className={`order-2 md:order-1 w-full md:w-1/2 h-screen overflow-auto transition-all duration-500 ${modalVisible ? "md:w-full" : ""
+                  }`}
+              >
+                <ProjectList
+                  onModalToggle={setModalVisible}
+                  isAppHovered={isHoveringApp}
+                  shouldLoadData={isHoveringApp}
+                />
+              </div>
+            </Suspense>
+
+            <Footer />
+            <PhonkMusicPlayer autoPlay={true} />
+            <PerformanceMonitor />
+          </div>
         </>
       )}
     </>

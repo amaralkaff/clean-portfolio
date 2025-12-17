@@ -52,7 +52,7 @@ const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
     return (
       <div
         ref={targetRef as React.RefObject<HTMLDivElement>}
-        className={`${className} bg-gray-200 dark:bg-gray-700 animate-pulse rounded`}
+        className={`${className} bg-gray-200 dark:bg-gray-700 rounded`}
         style={{ width, height, ...style }}
       />
     );
@@ -73,13 +73,7 @@ const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
         />
       )}
 
-      {/* Loading skeleton */}
-      {!lowQualitySrc && !isLoaded && !hasError && (
-        <div
-          className={`${className} bg-gray-200 dark:bg-gray-700 animate-pulse rounded absolute inset-0`}
-          style={style}
-        />
-      )}
+
 
       {/* Main image */}
       {shouldLoad && (
@@ -88,9 +82,8 @@ const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
           alt={alt}
           width={width}
           height={height}
-          className={`${className} transition-opacity duration-300 ${
-            isLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`${className} transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
           style={style}
           onLoad={handleLoad}
           onError={handleError}

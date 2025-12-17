@@ -47,17 +47,15 @@ export function useProjectListViewModel(
     }
 
     setIsVideoLoading(true);
-    
+
     if (selectedProject !== index) {
       if (videoRef.current) {
         videoRef.current.pause();
         videoRef.current.removeAttribute('src');
         videoRef.current.load();
       }
-      
-      // Small delay to allow cleanup
-      await new Promise(resolve => setTimeout(resolve, 50));
-      
+
+
       setSelectedProject(index);
       setIsActive(true);
       onModalToggle(true);
@@ -73,7 +71,7 @@ export function useProjectListViewModel(
 
   useEffect(() => {
     if (!isActive && selectedProject !== null) {
-      closeTimerRef.current = setTimeout(closeModal, 500);
+      closeModal();
     }
     return () => {
       if (closeTimerRef.current) {

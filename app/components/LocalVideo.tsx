@@ -1,16 +1,7 @@
 // components/LocalVideo.tsx
 import React, { forwardRef, useState, useEffect, useCallback } from 'react';
-import dynamic from 'next/dynamic';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 
-const AnimeLoader = dynamic(() => import('./AnimeLoader'), {
-  ssr: false,
-  loading: () => (
-    <div className="flex items-center justify-center w-full h-full bg-[var(--bg-card)] rounded-lg animate-pulse">
-      <div className="w-10 h-10 border-4 border-[var(--text-secondary)] border-t-[var(--text-primary)] rounded-full animate-spin" />
-    </div>
-  ),
-});
 
 interface LocalVideoProps {
   src: string;
@@ -153,11 +144,7 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
         onClick={handleUserInteraction}
       >
         {/* Loading State with AnimeLoader */}
-        {isLoading && shouldLoad && (
-          <div className="absolute inset-0 flex items-center justify-center rounded-2xl overflow-hidden">
-            <AnimeLoader />
-          </div>
-        )}
+
 
         {/* Autoplay Blocked Indicator */}
         {autoplayBlocked && !isLoading && (
