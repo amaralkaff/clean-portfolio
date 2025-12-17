@@ -11,6 +11,7 @@
   background-clip: text;
   display: inline-block;
   animation: shine 5s linear infinite;
+  will-change: background-position;
 }
 
 .dark .shiny-text {

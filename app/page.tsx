@@ -17,7 +17,6 @@ const Noise = dynamic(() => import("./components/Noise"), {
 
 // Critical components - Load immediately
 const MainContent = dynamic(() => import("./components/MainContent"), {
-  ssr: false,
   loading: () => null
 });
 const ThemeToggle = dynamic(() => import("./components/ThemeToggle"), {

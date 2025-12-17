@@ -134,8 +134,8 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
   return (
     <div
       className={`fixed transition-all duration-500 ease-in-out z-50 transform ${isExpanded
-          ? "top-2 left-[50%] -translate-x-1/2 scale-100"
-          : "top-6 left-8 w-16 h-16 scale-100"
+        ? "top-2 left-[50%] -translate-x-1/2 scale-100"
+        : "top-6 left-8 w-16 h-16 scale-100"
         } ${isTransitioning ? 'will-change-transform' : ''}`}
       style={{
         transformOrigin: isExpanded ? 'center top' : 'left top',
@@ -144,8 +144,8 @@ const PhonkMusicPlayer: React.FC<PhonkMusicPlayerProps> = ({
       }}
     >
       {/* Hidden audio elements */}
-      <audio ref={audioRef} preload="auto" muted={false} loop={false} />
-      <audio ref={nextAudioRef} preload="auto" style={{ display: 'none' }} />
+      <audio ref={audioRef} preload="none" muted={false} loop={false} />
+      <audio ref={nextAudioRef} preload="none" style={{ display: 'none' }} />
 
       {isExpanded ? (
         // Expanded player
