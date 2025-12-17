@@ -4,12 +4,25 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 });
 
 const nextConfig = {
+  reactStrictMode: true,
+  swcMinify: true,
+  compress: true,
+  poweredByHeader: false,
+
   // Performance optimizations
   experimental: {
     optimizeCss: true,
     optimizePackageImports: ['react-icons', 'animejs'],
+    scrollRestoration: true,
   },
-  
+
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    dangerouslyAllowSVG: true,
+  },
+
   // Bundle optimization
   webpack: (config, { isServer }) => {
     // Optimize bundle splitting
@@ -35,19 +48,20 @@ const nextConfig = {
             chunks: 'all',
             priority: 5,
             reuseExistingChunk: true,
+            enforce: true,
           },
         },
       };
     }
-    
+
     return config;
   },
-  
+
   // Compiler optimizations for modern browsers
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-  
+
   async headers() {
     return [
       {
@@ -59,9 +73,29 @@ const nextConfig = {
           },
         ],
       },
-      // Performance headers
+      // Caching for static assets (images)
+      {
+        source: '/:all*(svg|jpg|jpeg|png|gif|ico|webp|avif)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // Caching for next static
       {
         source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // Caching for video files
+      {
+        source: '/video/:path*',
         headers: [
           {
             key: 'Cache-Control',
@@ -73,4 +107,4 @@ const nextConfig = {
   },
 }
 
-module.exports = withBundleAnalyzer(nextConfig) 
+module.exports = withBundleAnalyzer(nextConfig)

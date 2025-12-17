@@ -217,7 +217,6 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
             playsInline={true}
             disablePictureInPicture
             controlsList="nodownload"
-            crossOrigin="anonymous"
           >
             Your browser does not support the video tag.
           </video>
